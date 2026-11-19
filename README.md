@@ -15,7 +15,7 @@ Read inference-worker/README.md for the existing laboratory environment, frozen 
 The local replay reproduced archived scores and artifact hashes. The live browser upload, storage, worker and result roundtrip requires the configured R2 service and deployed function.
 
 ## GitHub Pages
-Create an independent repository named STEGASUS under the intended account. Push this checkout and select GitHub Actions in Pages settings. The included workflow publishes dist and is guarded by the repository name. No GitHub credentials or repository creation capability were available during this build.
+The independent repository is https://github.com/keanpsalmescorial/STEGASUS. GitHub Actions publishes dist to https://keanpsalmescorial.github.io/STEGASUS/. Pages is enabled and deployment has been verified. The included workflow runs tests and syntax checks before publication.
 
 ## Research provenance
 dist/data/manuscript.json contains the abstract, 37 numbered tables plus appendix A1, references, captions and limitations. dist/data/figures holds 22 extracted study figures. PHAGOS was inspected read-only. This checkout contains original presentation code and conceptual artwork.
