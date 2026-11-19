@@ -210,7 +210,7 @@ async function report(node){
 }
 async function start(){
  const cfg=window.STEGASUS_CONFIG||{};
- if(!cfg.supabaseUrl||!cfg.supabaseAnonKey){noService('Private workspace access is offline. The site owner needs to connect the laboratory's Supabase project before sign-in and analysis become available.');return;}
+ if(!cfg.supabaseUrl||!cfg.supabaseAnonKey){noService('Private workspace access is offline. The site owner needs to connect the laboratory Supabase project before sign-in and analysis become available.');return;}
  try{
   const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/+esm');
   client=createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
