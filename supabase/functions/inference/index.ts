@@ -1,10 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.49.4';
-import { S3Client,CreateMultipartUploadCommand,UploadPartCommand,ListPartsCommand,CompleteMultipartUploadCommand,AbortMultipartUploadCommand,HeadObjectCommand,GetObjectCommand,PutObjectCommand,DeleteObjectCommand } from 'npm:@aws-sdk/client-s3@3.750.0';
+import { S3Client,HeadBucketCommand,CreateMultipartUploadCommand,UploadPartCommand,ListPartsCommand,CompleteMultipartUploadCommand,AbortMultipartUploadCommand,HeadObjectCommand,GetObjectCommand,PutObjectCommand,DeleteObjectCommand } from 'npm:@aws-sdk/client-s3@3.750.0';
 import { getSignedUrl } from 'npm:@aws-sdk/s3-request-presigner@3.750.0';
 import { Problem,insist,checkedId,checkUpload,partLength,verifyParts,checkResult,artifactKey,PART_SIZE,FROZEN_THRESHOLD } from './validation.mjs';
 
 const setting=(name:string)=>Deno.env.get(name)||'';
-function required(name:string){const value=setting(name);insist(value,503,'Inference service is awaiting configuration.');return value;}
+function required(name:string){const value=setting(name).trim();insist(value,503,'Inference service is awaiting configuration.');return value;}
 function budget(name:string,fallback:number){const n=Number(setting(name)||fallback);insist(Number.isSafeInteger(n)&&n>0,503,'Inference limits are unavailable.');return n;}
 const origins=()=>setting('STEGASUS_ALLOWED_ORIGINS').split(',').map(s=>s.trim()).filter(Boolean);
 let storage:S3Client;
@@ -41,6 +41,22 @@ async function guardedUpdate(p:PromiseLike<any>){insist(read(await p),409,'The j
 async function worker(client:Db,token:string,b:any){
   const scope=await workerAuth(token),workerId=b.workerId;
   insist(typeof workerId==='string'&&/^[\w.-]{1,100}$/.test(workerId),400,'Invalid worker identifier.');
+  if(b.action==='worker-storage-check'){
+    try{
+      await r2().send(new HeadBucketCommand({Bucket:bucket()}));
+      const probe={Bucket:bucket(),Key:scope+'/checks/'+crypto.randomUUID()+'.tif'};
+      const upload=await r2().send(new CreateMultipartUploadCommand({...probe,ContentType:'image/tiff'}));
+      insist(upload.UploadId,503,'Storage could not start this upload.');
+      await r2().send(new AbortMultipartUploadCommand({...probe,UploadId:upload.UploadId}));
+      return {storageReady:true,multipartReady:true};
+    }catch(error){
+      const failure=error as any;
+      return {storageReady:false,errorCode:typeof failure.name==='string'?failure.name.slice(0,80):'StorageError',httpStatus:failure.$metadata?.httpStatusCode??null,
+        accountFormatValid:/^[a-f0-9]{32}$/i.test(setting('R2_ACCOUNT_ID')),
+        accessKeyFormatValid:/^[a-f0-9]{32}$/i.test(setting('R2_ACCESS_KEY_ID')),
+        secretFormatValid:/^[a-f0-9]{64}$/i.test(setting('R2_SECRET_ACCESS_KEY'))};
+    }
+  }
   if(b.action==='worker-claim'||b.action==='worker-heartbeat'){
     read(await client.from('inference_workers').upsert({workspace_id:scope,worker_id:workerId,last_seen:now()}));
     if(b.action==='worker-claim'){
@@ -166,3 +182,4 @@ Deno.serve(async req=>{
     return respond(200,result);
   }catch(e){return respond(e instanceof Problem?e.status:503,{error:e instanceof Problem?e.message:'Inference service temporarily unavailable.'});}
 });
+
