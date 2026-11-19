@@ -1,0 +1,5 @@
+project_id = "stegasus"
+
+[functions.inference]
+# The handler independently validates a Supabase user JWT or scoped worker credential.
+verify_jwt = false

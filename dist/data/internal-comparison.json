@@ -1,0 +1,90 @@
+{
+  "title": "Individual experts, simple averaging, and the calibrated ensemble",
+  "columns": [
+    "Model",
+    "Accuracy",
+    "Precision",
+    "Sensitivity",
+    "Specificity",
+    "F1",
+    "AUROC",
+    "AP",
+    "Brier score",
+    "Log loss"
+  ],
+  "rows": [
+    [
+      "EfficientNetB0",
+      "0.8906",
+      "0.8696",
+      "0.8333",
+      "0.9250",
+      "0.8511",
+      "0.9581",
+      "0.8939",
+      "0.4398",
+      "2.5518"
+    ],
+    [
+      "MobileViT-XXS",
+      "0.8984",
+      "0.9730",
+      "0.7500",
+      "0.9875",
+      "0.8471",
+      "0.9798",
+      "0.9542",
+      "0.3550",
+      "1.4760"
+    ],
+    [
+      "ResNet50",
+      "0.9141",
+      "0.9744",
+      "0.7917",
+      "0.9875",
+      "0.8736",
+      "0.9841",
+      "0.9604",
+      "0.3503",
+      "1.4864"
+    ],
+    [
+      "Spatial Graph",
+      "0.9609",
+      "1.0000",
+      "0.8958",
+      "1.0000",
+      "0.9451",
+      "0.9992",
+      "0.9988",
+      "0.1921",
+      "0.9580"
+    ],
+    [
+      "Simple averaging",
+      "0.9297",
+      "1.0000",
+      "0.8125",
+      "1.0000",
+      "0.8966",
+      "0.9987",
+      "0.9978",
+      "0.2189",
+      "0.5957"
+    ],
+    [
+      "STEGASUS",
+      "0.9141",
+      "1.0000",
+      "0.7708",
+      "1.0000",
+      "0.8706",
+      "0.9945",
+      "0.9908",
+      "0.0565",
+      "0.2072"
+    ]
+  ],
+  "note": "128 sampled source-slide groups. Estimates are rounded to four decimals. Source: archived all_configuration_confidence_intervals.csv, corresponding to the manuscript's internal comparison."
+}

@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+*.tmp
+node_modules/
+.supabase/
+supabase/.temp/
+*.pt
+*.joblib
+*.tif
+*.tiff

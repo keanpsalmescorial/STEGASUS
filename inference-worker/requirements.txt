@@ -1,0 +1,15 @@
+# Windows laboratory runtime, tested with CPython 3.12 and CUDA 12.6.
+# Install the selected torch build from the official PyTorch wheel index first.
+torch==2.7.1
+torchvision==0.22.1
+timm==1.0.30
+openslide-python==1.4.7
+openslide-bin==4.0.1.2
+Pillow==13.0.0
+numpy==2.2.6
+scikit-learn==1.6.1
+scipy==1.15.3
+h5py==3.16.0
+joblib==1.6.0
+matplotlib==3.11.2
+requests==2.34.2
