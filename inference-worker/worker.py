@@ -17,6 +17,7 @@ from uuid import UUID
 
 import requests
 from job_cache import job_directory, verified_download
+from progress_report import Progress
 
 ROOT = Path(__file__).resolve().parent
 FROZEN = ROOT / "frozen"
@@ -104,7 +105,7 @@ def signed_url(url):
     return url
 
 
-def fetch_slide(url, target, lost, limit, expected_size):
+def fetch_slide(url, target, lost, limit, expected_size, progress=None):
     available = shutil.disk_usage(target.parent).free - 2 * 1024**3
     cap = min(limit, available)
     if type(expected_size) is not int or not 0 < expected_size <= cap:
@@ -122,11 +123,13 @@ def fetch_slide(url, target, lost, limit, expected_size):
                 if total > expected_size or lost.is_set():
                     raise RuntimeError("Slide transfer stopped.")
                 out.write(chunk)
+                if progress:progress.update('download',total,expected_size)
     if total != expected_size:
         raise RuntimeError("Incomplete input transfer.")
 
 
-def compute(slide, output, run, lost, pipeline='frozen', batch_size=8):
+def compute(slide, output, run, lost, pipeline='frozen', batch_size=8, progress=None):
+    if progress:progress.update('preparing')
     if slide.suffix.lower() not in (".tif", ".tiff"):
         raise ValueError("Accepted input is a pyramidal research TIFF.")
     import openslide
@@ -144,7 +147,15 @@ def compute(slide, output, run, lost, pipeline='frozen', batch_size=8):
     # Restrict the child to local model computation; keep worker credentials out.
     env = {k: v for k, v in os.environ.items() if k not in {"WORKER_TOKEN", "SUPABASE_SERVICE_ROLE_KEY",
                                                              "AWS_SECRET_ACCESS_KEY", "R2_SECRET_ACCESS_KEY"}}
-    child = subprocess.Popen(args, env=env)
+    child = subprocess.Popen(args, env=env,**({'stdout':subprocess.PIPE,'text':True,'bufsize':1} if progress else {}))
+    reader=None
+    if progress:
+        def read_output():
+            for line in child.stdout:
+                progress.line(line)
+                print(line,end='',flush=True)
+        reader=threading.Thread(target=read_output,daemon=True)
+        reader.start()
     try:
         while child.poll() is None:
             if lost.wait(1):
@@ -155,17 +166,26 @@ def compute(slide, output, run, lost, pipeline='frozen', batch_size=8):
         if child.poll() is None:
             child.terminate()
             child.wait()
+        if reader:
+            reader.join(timeout=5)
+            if not reader.is_alive():child.stdout.close()
     return score_artifacts(output)
 
 
 def process(service, job, run, limit, pipeline='frozen', batch_size=8, cache_dir=None):
     lease = {"jobId": str(UUID(job["id"])), "leaseToken": job["lease_token"]}
     stop, lost = threading.Event(), threading.Event()
+    report=Progress(pipeline)
+    try:
+        profile=service.post('worker-timing-profile',pipeline=pipeline,size=job['size_bytes'])
+        report.expected_total=profile.get('expectedSeconds')
+    except (RuntimeError,requests.RequestException):
+        pass
 
     def keep_lease():
-        while not stop.wait(45):
+        while not stop.wait(10):
             try:
-                service.post("worker-heartbeat", **lease)
+                service.post("worker-heartbeat", **lease, progress=report.snapshot())
             except (RuntimeError, requests.RequestException):
                 lost.set()
                 break
@@ -184,13 +204,14 @@ def process(service, job, run, limit, pipeline='frozen', batch_size=8, cache_dir
             if type(job['size_bytes']) is not int or not 0 < job['size_bytes'] <= limit:
                 raise RuntimeError('Declared input size exceeds the laboratory limit.')
             if pipeline=='direct' and cache_dir:
-                reused=verified_download(slide,job,lambda target:fetch_slide(job['downloadUrl'],target,lost,limit,job['size_bytes']))
+                reused=verified_download(slide,job,lambda target:fetch_slide(job['downloadUrl'],target,lost,limit,job['size_bytes'],report))
                 print('Verified input cache reused.' if reused else 'Input downloaded and verified.',flush=True)
             else:
-                fetch_slide(job["downloadUrl"], slide, lost, limit, job["size_bytes"])
+                fetch_slide(job["downloadUrl"], slide, lost, limit, job["size_bytes"],report)
             stage = "frozen computation"
-            result = compute(slide, base / "outputs", run, lost, pipeline, batch_size)
+            result = compute(slide, base / "outputs", run, lost, pipeline, batch_size,report)
             stage = "artifact transfer"
+            report.update('artifacts',0,len(ARTIFACTS))
             artifacts = []
             for kind, (filename, mime) in ARTIFACTS.items():
                 if lost.is_set():
@@ -202,8 +223,10 @@ def process(service, job, run, limit, pipeline='frozen', batch_size=8, cache_dir
                     if not 200 <= response.status_code < 300:
                         raise RuntimeError("Private artifact upload failed.")
                 artifacts.append(dict(kind=kind, key=target["key"], mimeType=mime))
+                report.update('artifacts',len(artifacts),len(ARTIFACTS))
             if not lost.is_set():
-                service.post("worker-complete", **lease, result=result, artifacts=artifacts)
+                report.update('complete')
+                service.post("worker-complete", **lease, result=result, artifacts=artifacts,progress=report.snapshot())
     except Exception as exc:
         # Exclude paths, signed URLs and credentials from remote error records.
         if not lost.is_set():

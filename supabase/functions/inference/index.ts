@@ -3,6 +3,7 @@ import { S3Client,HeadBucketCommand,CreateMultipartUploadCommand,UploadPartComma
 import { getSignedUrl } from 'npm:@aws-sdk/s3-request-presigner@3.750.0';
 import { FetchHttpHandler } from 'npm:@smithy/fetch-http-handler@5.0.4';
 import { finalizeUpload } from './finalize.mjs';
+import { checkedProgress } from './progress.mjs';
 import { Problem,insist,checkedId,checkUpload,partLength,verifyParts,checkResult,artifactKey,PART_SIZE,FROZEN_THRESHOLD } from './validation.mjs';
 
 const setting=(name:string)=>Deno.env.get(name)||'';
@@ -43,6 +44,12 @@ async function guardedUpdate(p:PromiseLike<any>){insist(read(await p),409,'The j
 async function worker(client:Db,token:string,b:any){
   const scope=await workerAuth(token),workerId=b.workerId;
   insist(typeof workerId==='string'&&/^[\w.-]{1,100}$/.test(workerId),400,'Invalid worker identifier.');
+  if(b.action==='worker-timing-profile'){
+    insist(['frozen','direct'].includes(b.pipeline)&&Number.isSafeInteger(b.size)&&b.size>0,400,'Invalid timing request.');
+    const rows=read(await client.from('inference_jobs').select('result').eq('workspace_id',scope).eq('worker_id',workerId).eq('status','completed').gte('size_bytes',Math.floor(b.size*.75)).lte('size_bytes',Math.ceil(b.size*1.25)).order('updated_at',{ascending:false}).limit(20));
+    const times=rows.filter((r:any)=>r.result?.progress?.pipeline===b.pipeline&&Number.isFinite(r.result?.progress?.elapsedSeconds)&&r.result?.progress.elapsedSeconds>0).map((r:any)=>r.result?.progress.elapsedSeconds).sort((a:number,b:number)=>a-b);
+    return {expectedSeconds:times.length>=3?times[Math.floor(times.length/2)]:null,samples:times.length};
+  }
   if(b.action==='worker-storage-check'){
     try{
       await r2().send(new HeadBucketCommand({Bucket:bucket()}));
@@ -76,7 +83,7 @@ async function worker(client:Db,token:string,b:any){
   if(b.action==='worker-complete'&&j.status==='completed')return {ok:true};
   insist(j.status==='processing'&&Date.parse(j.lease_until)>Date.now(),409,'Worker lease expired.');
   if(b.action==='worker-heartbeat'){
-    await guardedUpdate(leased(client,j,{updated_at:now(),lease_until:new Date(Date.now()+300000).toISOString()}));return {ok:true};
+    await guardedUpdate(leased(client,j,{updated_at:now(),lease_until:new Date(Date.now()+300000).toISOString(),...(b.progress?{result:{progress:checkedProgress(b.progress,now())}}:{})}));return {ok:true};
   }
   if(b.action==='worker-artifact'){
     const key=artifactKey(j,b.kind,b.mimeType);
@@ -93,7 +100,7 @@ async function worker(client:Db,token:string,b:any){
     insist(a.key===artifactKey(j,a.kind,a.mimeType)&&!kinds.has(a.kind),400,'Invalid artifact provenance.');kinds.add(a.kind);
     const head=await r2().send(new HeadObjectCommand({Bucket:bucket(),Key:a.key}));insist(head.ContentLength&&head.ContentType===a.mimeType,409,'Artifact upload is incomplete.');
   }
-  await guardedUpdate(leased(client,j,{status:'completed',updated_at:now(),lease_until:null,result:{score:b.result.score,threshold:FROZEN_THRESHOLD,modelVersion:b.result.modelVersion,patchCount:b.result.patchCount,expertScores:b.result.expertScores,inputSha256:b.result.inputSha256,classification:b.result.score>=FROZEN_THRESHOLD?'Flagged':'Below threshold'},artifacts:artifacts.map(({kind,key,mimeType}:any)=>({kind,key,mimeType}))}));
+  await guardedUpdate(leased(client,j,{status:'completed',updated_at:now(),lease_until:null,result:{...(b.progress?{progress:checkedProgress(b.progress,now())}:{}),score:b.result.score,threshold:FROZEN_THRESHOLD,modelVersion:b.result.modelVersion,patchCount:b.result.patchCount,expertScores:b.result.expertScores,inputSha256:b.result.inputSha256,classification:b.result.score>=FROZEN_THRESHOLD?'Flagged':'Below threshold'},artifacts:artifacts.map(({kind,key,mimeType}:any)=>({kind,key,mimeType}))}));
   return {ok:true};
 }
 

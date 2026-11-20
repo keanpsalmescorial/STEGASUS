@@ -13,3 +13,7 @@
 .analysis-pan {overflow:auto;max-height:28rem;background:#f5f3ff}
 .analysis-pan img {display:block;width:100%;max-width:none}
 .analysis-studio [hidden]{display:none!important}
+.job-progress{display:grid;gap:.3rem;min-width:14rem;max-width:25rem}
+.job-progress small{display:block;color:#625475;font-size:.85rem}
+.job-progress progress{height:.7rem}
+.job-progress .target-exceeded{color:#8a4215}

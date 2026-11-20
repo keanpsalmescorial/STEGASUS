@@ -1,5 +1,23 @@
 # Frozen STEGASUS WSI worker
 
+## Studio progress and time estimates
+
+Restarting the worker loads progress reporting for both processing paths. It sends
+stage, counts and measured elapsed time with fenced job heartbeats every ten seconds;
+the Studio refreshes every five seconds. Progress bars describe the current stage,
+not a fabricated percentage of total inference. Upload and download estimates use
+observed throughput; patch estimates use new work since the first observed batch.
+Graph processing remains indeterminate without measured comparable job timings.
+A total time estimate uses at least three successful jobs on the same worker and
+pipeline with file sizes within 25 percent. This is approximate: tissue content and
+hardware load can differ. Expired predictions revert to calculating rather than zero.
+Stale telemetry pauses estimates. Failed and queued jobs have no countdown.
+Telemetry is stored inside the existing protected job result metadata while processing;
+only completed jobs have prediction results. No database privileges were added.
+Five minutes is a user-facing target, not an achieved benchmark or a timeout. Jobs
+continue after exceeding it. No slide resolution, tissue coverage or models are reduced
+to meet this target. Publication does not restart workers or submit jobs.
+
 ## Optional batched direct-slide path
 
 The frozen pipeline already reads coordinates directly from OpenSlide and stores

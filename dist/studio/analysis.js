@@ -1,3 +1,4 @@
+import {progressView} from './progress.mjs';
 const jobFields = 'id,case_id,filename,status,size_bytes,created_at,updated_at,result,error,experiment_id';
 const writableRoles = ['owner','administrator','researcher'];
 
@@ -42,7 +43,7 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
   const section=node('section',undefined,{class:'analysis-studio'}), title=node('h2','AI Analysis Studio');
   container.replaceChildren(section);section.append(title,node('p','Analyze authorized, de-identified TIFF slides with the frozen STEGASUS laboratory worker.'));
   if(!workspaceId||!projectId){section.append(node('p','Select a workspace and a project to view or submit analysis jobs.'));return ()=>{};}
-  let alive=true,timer,currentId=null,upload=null,busy=false,viewSequence=0,refreshing=false;
+  let alive=true,timer,currentId=null,upload=null,busy=false,viewSequence=0,refreshing=false,selectedJobId=null,selectedJobStatus=null;
   const files=node('input',undefined,{type:'file',accept:'.tif,.tiff,image/tiff',required:''}), caseId=node('input',undefined,{required:'',maxlength:'100',placeholder:'e.g. Research case 021'});
   const consent=node('input',undefined,{type:'checkbox',required:''}), declaration=node('label');
   declaration.append(consent,document.createTextNode(' I am authorized to submit this de-identified research tissue.'));
@@ -67,9 +68,25 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
     if(data?.error)throw new Error(data.error);return data;
   }
   function say(text){if(alive)feedback.textContent=text;}
+  function jobProgress(j){
+    const view=progressView(j),box=node('div',undefined,{class:'job-progress','data-job-progress':j.id});
+    box.append(node('span',view.label));
+    if(['processing','queued','completed'].includes(j.status)){
+      const bar=node('progress',undefined,{max:'100','aria-label':view.percent===null?'Processing activity':'Current stage progress'});
+      if(view.percent!==null)bar.value=view.percent;
+      box.append(bar);
+    }
+    box.append(node('small',view.eta));
+    if(view.elapsed!==undefined)box.append(node('small',`${view.elapsed} min processing elapsed`));
+    const age=(Date.now()-Date.parse(j.created_at))/1000;
+    if(['processing','queued','uploading'].includes(j.status)&&age>300)box.append(node('small','Five-minute target exceeded; analysis continues.',{class:'target-exceeded'}));
+    return box;
+  }
   async function show(j) {
+    selectedJobId=j.id;selectedJobStatus=j.status;
     const sequence=++viewSequence;detail.replaceChildren(node('h3',j.case_id),node('p',j.filename+' � '+j.status+' � '+new Date(j.updated_at).toLocaleString()));
     if(j.error)detail.append(node('p',j.error));
+    detail.append(jobProgress(j));
     if(j.status!=='completed'||!j.result)return;
     const r=j.result,t=node('table');const header=node('tr');header.append(node('th','Result'),node('th','Value'));t.append(header);
     const lookup=await client.from('experiments').select('id,name').eq('workspace_id',workspaceId).eq('project_id',projectId).order('name');
@@ -115,7 +132,7 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
       list.replaceChildren();if(!data.length){list.append(node('p','No analysis jobs in this project.'));return;}
       const table=node('table'),head=node('tr');for(const h of ['Case','Slide','Status','Submitted'])head.append(node('th',h));table.append(head);
       for(const j of data){
-        const row=node('tr'),cell=node('td');cell.append(actionButton(j.case_id,()=>show(j)));row.append(cell,node('td',j.filename),node('td',j.status),node('td',new Date(j.created_at).toLocaleDateString()));table.append(row);
+        const row=node('tr'),cell=node('td'),state=node('td');state.append(jobProgress(j));cell.append(actionButton(j.case_id,()=>show(j)));row.append(cell,node('td',j.filename),state,node('td',new Date(j.created_at).toLocaleDateString()));table.append(row);
         if(j.status==='uploading'&&writableRoles.includes(role)&&j.id!==currentId){
           const c=node('td');
           const recover=actionButton('Confirm upload and queue',async()=>{
@@ -128,6 +145,11 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
         }
       }
       list.append(table);
+      const selectedJob=data.find(j=>j.id===selectedJobId);
+      if(selectedJob){
+        if(selectedJob.status!==selectedJobStatus)await show(selectedJob);
+        else detail.querySelector('[data-job-progress]')?.replaceWith(jobProgress(selectedJob));
+      }
     }catch(e){if(alive)list.replaceChildren(node('p',e.message));}finally{refreshing=false;}
   }
   form.onsubmit=async e=>{
@@ -135,14 +157,17 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
     if(!service.configured||!selected||!consent.checked||!caseId.value.trim()){say('Choose a TIFF slide, identify the case and confirm authorization.');return;}
     if(!/\.tiff?$/i.test(selected.name)||selected.size<1||selected.size>service.limit){say('Choose a nonempty TIFF slide within the '+Math.floor(service.limit/1024**2)+' MiB limit.');return;}
     const file=selected,controller=new AbortController();upload=controller;busy=true;submit.disabled=files.disabled=caseId.disabled=consent.disabled=true;progress.hidden=stop.hidden=false;progress.value=0;
-    let submitted=false,finishing=false;
+    let submitted=false,finishing=false;const uploadStarted=performance.now();
     try{
       const begin=await api('begin',{workspaceId,projectId,caseId:caseId.value.trim(),authorized:true,filename:file.name,size:file.size});currentId=begin.jobId;
       for(let offset=0,part=1;offset<file.size;offset+=begin.partSize,part++){
         const bytes=file.slice(offset,Math.min(offset+begin.partSize,file.size));
         for(let attempt=0;;attempt++){
           if(controller.signal.aborted)throw new Error('Transfer stopped.');
-          try{const {uploadUrl}=await api('part',{jobId:currentId,partNumber:part});await transfer(uploadUrl,bytes,count=>progress.value=(offset+count)/file.size*100,controller.signal);break;}
+          try{const {uploadUrl}=await api('part',{jobId:currentId,partNumber:part});await transfer(uploadUrl,bytes,count=>{
+            const sent=offset+count,elapsed=(performance.now()-uploadStarted)/1000;progress.value=sent/file.size*100;
+            say(`Uploading: ${Math.floor(progress.value)}%. `+(elapsed>=5&&sent>0?`About ${Math.max(1,Math.ceil(elapsed*(file.size-sent)/sent/60))} min remaining for upload.`:'Calculating upload time.'));
+          },controller.signal);break;}
           catch(err){if(attempt>=2||controller.signal.aborted)throw err;say('Retrying part '+part+'.');}
         }
       }
@@ -157,7 +182,7 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
       currentId=null;upload=null;busy=false;files.disabled=caseId.disabled=consent.disabled=false;stop.hidden=progress.hidden=true;submit.disabled=!service.configured;await refresh();
     }
   };
-  await refresh();if(alive)timer=setInterval(()=>{if(!section.isConnected){dispose();return;}if(!document.hidden)refresh();},15000);
+  await refresh();if(alive)timer=setInterval(()=>{if(!section.isConnected){dispose();return;}if(!document.hidden)refresh();},5000);
   function dispose(){alive=false;viewSequence++;clearInterval(timer);upload?.abort();}
   return dispose;
 }
