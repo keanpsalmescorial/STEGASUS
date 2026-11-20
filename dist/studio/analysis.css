@@ -17,3 +17,10 @@
 .job-progress small{display:block;color:#625475;font-size:.85rem}
 .job-progress progress{height:.7rem}
 .job-progress .target-exceeded{color:#8a4215}
+.analysis-steps{display:flex;gap:1rem;list-style:decimal inside;padding:1rem;border-radius:.75rem;background:#f2ecfa;flex-wrap:wrap}
+.analysis-steps li{flex:1;min-width:9rem;color:#6034a4;font-weight:600}
+.analysis-history{padding:1rem;border:1px solid #ded4ef;border-radius:.75rem}
+.analysis-studio summary{cursor:pointer;font-weight:600;padding:.5rem 0}
+.analysis-studio .analysis-verdict{font-size:1.6rem;font-weight:700;color:#6034a4;margin-bottom:0}
+.analysis-studio article>.job-progress{max-width:none;width:100%;padding:1rem 0}
+.analysis-studio form{max-width:none}

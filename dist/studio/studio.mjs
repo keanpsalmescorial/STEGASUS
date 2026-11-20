@@ -1,7 +1,7 @@
 import {el,p,panel,button,select,form,accordion,table,dataGrid,exportsFor,chart,download} from './ui.mjs';
 import {readCsv,validateRows,columns,numeric,describe,classify,toCsv} from './data.mjs';
 const app=document.querySelector('#app'), notice=document.querySelector('#notice');
-let client,session,workspace=null,role='',projectId='',experimentId='',datasetId='',view='Dashboard',version=0,cleanup;
+let client,session,workspace=null,role='',projectId='',experimentId='',datasetId='',view='AI Analysis Studio',version=0,cleanup;
 let workspaces=[],projects=[],experiments=[],datasets=[];
 const templates=[['pathology','Computational pathology laboratory'],['ml','Machine learning research team'],['general','General research laboratory'],['personal','Personal research workspace']];
 const pages=['Dashboard','Projects','Experiments','Datasets','AI Analysis Studio','Results Library','Analytics','Reports','Team Members','Settings'];
@@ -50,9 +50,9 @@ function auth(mode='Sign in'){
  app.replaceChildren(authLayout(el('div',{},el('h2',{},mode),tabs,authForm)));
 }
 function createSpace(){return form([['name','Workspace name','text',true],['template','Workspace type','select',true,templates]],'Create workspace',async f=>{
- const id=await rpc('create_workspace',{p_name:f.name.trim(),p_template:f.template});workspace={id};projectId='';experimentId='';datasetId='';view='Dashboard';await refresh();
+ const id=await rpc('create_workspace',{p_name:f.name.trim(),p_template:f.template});workspace={id};projectId='';experimentId='';datasetId='';view='AI Analysis Studio';await refresh();
 });}
-function acceptInvite(){return form([['token','Invitation token','text',true]],'Join workspace',async f=>{const id=await rpc('accept_invitation',{p_token:f.token.trim()});workspace={id};projectId='';experimentId='';datasetId='';view='Dashboard';await refresh();});}
+function acceptInvite(){return form([['token','Invitation token','text',true]],'Join workspace',async f=>{const id=await rpc('accept_invitation',{p_token:f.token.trim()});workspace={id};projectId='';experimentId='';datasetId='';view='AI Analysis Studio';await refresh();});}
 async function refresh(){
  const rev=++version;
  cleanup?.();cleanup=null;
@@ -70,7 +70,7 @@ async function refresh(){
  projectId=projects.some(x=>x.id===projectId)?projectId:projects[0]?.id||'';
  experimentId=activeExp()?.id||experiments.find(x=>x.project_id===projectId)?.id||'';
  datasetId=datasets.some(x=>x.id===datasetId)?datasetId:datasets[0]?.id||'';
- const side=el('aside',{},select('Workspace',choices.map(x=>[x.id,x.name]),id,v=>{workspace={id:v};projectId='';experimentId='';datasetId='';refresh();}),p(role,'muted'),el('nav',{'aria-label':'Workspace navigation'},...pages.map(v=>button(v,()=>navigate(v),v===view?'active':''))),signOut());
+ const side=el('aside',{},select('Workspace',choices.map(x=>[x.id,x.name]),id,v=>{workspace={id:v};projectId='';experimentId='';datasetId='';refresh();}),p(role,'muted'),el('nav',{'aria-label':'Workspace navigation'},button('Analyze slide',()=>navigate('AI Analysis Studio'),view==='AI Analysis Studio'?'active':''),button('Results library',()=>navigate('Results Library'),view==='Results Library'?'active':''),accordion('Workspace tools',...pages.filter(v=>!['AI Analysis Studio','Results Library'].includes(v)).map(v=>button(v,()=>navigate(v),v===view?'active':'')))),signOut());
  const content=el('div');root.replaceChildren(p(templates.find(t=>t[0]===workspace.template)?.[1]||workspace.name,'eyebrow'),el('h1',{},view),content);
  const shell=el('div',{class:'shell'},side,root);app.replaceChildren(shell);
  await renderView(content,rev);
@@ -94,10 +94,14 @@ async function renderView(node,rev){
  else if(view==='Settings')await settings(node);
  else if(view==='Datasets')await datasetView(node);
  else if(view==='AI Analysis Studio'){
-  node.append(selectors());
-  if(!projectId){node.append(p('Create a project to submit an analysis.'));return;}
+  if(projects.length>1)node.append(accordion('Save location',selectors()));
+  if(!projectId){
+    node.append(p('Enable slide analysis to save your reports in this workspace.'));
+    if(readWrite())node.append(button('Enable slide analysis',async()=>{try{const {data,error}=await client.from('projects').insert({workspace_id:workspace.id,name:'Slide analyses',objectives:'Slide analysis reports and visualizations.'}).select('id').single();if(error)throw error;projectId=data.id;await refresh();}catch(e){info(e.message);}}));
+    return;
+  }
   const here=el('div');node.append(here);
-  const {mountAnalysis}=await import('./analysis.js?v=progress-1');if(rev!==version)return;
+  const {mountAnalysis}=await import('./analysis.js?v=simple-analysis-1');if(rev!==version)return;
   const dispose=await mountAnalysis(here,{client,workspaceId:workspace.id,projectId,role,user:session.user});
   if(rev!==version)dispose?.();else cleanup=dispose;
  }else if(view==='Results Library'){
@@ -218,7 +222,7 @@ async function start(){
   client.auth.onAuthStateChange((event,s)=>{
    session=s;
    if(event==='PASSWORD_RECOVERY'){recovering=true;auth('Set password');return;}
-   if(event==='SIGNED_OUT'){recovering=false;workspace=null;projectId=experimentId=datasetId='';view='Dashboard';info('');}
+   if(event==='SIGNED_OUT'){recovering=false;workspace=null;projectId=experimentId=datasetId='';view='AI Analysis Studio';info('');}
    if(event==='USER_UPDATED')recovering=false;
    const id=s?.user?.id||'';
    if(!recovering&&(prior!==id||event==='INITIAL_SESSION')){prior=id;setTimeout(()=>{if(!recovering)refresh();},0);}
