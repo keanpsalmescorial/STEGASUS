@@ -16,6 +16,7 @@ from urllib.parse import urlparse
 from uuid import UUID
 
 import requests
+from job_cache import job_directory, verified_download
 
 ROOT = Path(__file__).resolve().parent
 FROZEN = ROOT / "frozen"
@@ -125,7 +126,7 @@ def fetch_slide(url, target, lost, limit, expected_size):
         raise RuntimeError("Incomplete input transfer.")
 
 
-def compute(slide, output, run, lost):
+def compute(slide, output, run, lost, pipeline='frozen', batch_size=8):
     if slide.suffix.lower() not in (".tif", ".tiff"):
         raise ValueError("Accepted input is a pyramidal research TIFF.")
     import openslide
@@ -135,8 +136,11 @@ def compute(slide, output, run, lost):
             value = float(image.properties.get(key, "nan"))
             if not math.isfinite(value) or value <= 0:
                 raise ValueError("TIFF lacks verified physical scale metadata.")
-    args = [sys.executable, str(FROZEN / "wsi_infer.py"), "--slide", str(slide),
+    entry = ROOT / 'direct_pipeline.py' if pipeline == 'direct' else FROZEN / 'wsi_infer.py'
+    args = [sys.executable, str(entry), "--slide", str(slide),
             "--output", str(output), "--run", str(run)]
+    if pipeline == 'direct':
+        args += ['--batch-size', str(batch_size)]
     # Restrict the child to local model computation; keep worker credentials out.
     env = {k: v for k, v in os.environ.items() if k not in {"WORKER_TOKEN", "SUPABASE_SERVICE_ROLE_KEY",
                                                              "AWS_SECRET_ACCESS_KEY", "R2_SECRET_ACCESS_KEY"}}
@@ -154,7 +158,7 @@ def compute(slide, output, run, lost):
     return score_artifacts(output)
 
 
-def process(service, job, run, limit):
+def process(service, job, run, limit, pipeline='frozen', batch_size=8, cache_dir=None):
     lease = {"jobId": str(UUID(job["id"])), "leaseToken": job["lease_token"]}
     stop, lost = threading.Event(), threading.Event()
 
@@ -173,12 +177,19 @@ def process(service, job, run, limit):
         suffix = Path(job["filename"]).suffix.lower()
         if suffix not in {".tif", ".tiff"}:
             raise ValueError("Unsupported input format.")
-        with tempfile.TemporaryDirectory(prefix="stegasus-", dir=os.getenv("WORKER_TMP") or None) as directory:
+        directory_context = job_directory(cache_dir,job['id']) if pipeline=='direct' and cache_dir else tempfile.TemporaryDirectory(prefix="stegasus-", dir=os.getenv("WORKER_TMP") or None)
+        with directory_context as directory:
             base = Path(directory)
             slide = base / ("input" + suffix)
-            fetch_slide(job["downloadUrl"], slide, lost, limit, job["size_bytes"])
+            if type(job['size_bytes']) is not int or not 0 < job['size_bytes'] <= limit:
+                raise RuntimeError('Declared input size exceeds the laboratory limit.')
+            if pipeline=='direct' and cache_dir:
+                reused=verified_download(slide,job,lambda target:fetch_slide(job['downloadUrl'],target,lost,limit,job['size_bytes']))
+                print('Verified input cache reused.' if reused else 'Input downloaded and verified.',flush=True)
+            else:
+                fetch_slide(job["downloadUrl"], slide, lost, limit, job["size_bytes"])
             stage = "frozen computation"
-            result = compute(slide, base / "outputs", run, lost)
+            result = compute(slide, base / "outputs", run, lost, pipeline, batch_size)
             stage = "artifact transfer"
             artifacts = []
             for kind, (filename, mime) in ARTIFACTS.items():
@@ -209,14 +220,19 @@ def main():
     parser.add_argument("--slide", type=Path, help="Run the frozen model on one authorized local TIFF.")
     parser.add_argument("--output", type=Path, help="New directory for local computation outputs.")
     parser.add_argument("--run", type=Path, default=os.getenv("STEGASUS_MODEL_RUN"))
+    parser.add_argument('--pipeline', choices=['frozen','direct'], default=os.getenv('STEGASUS_PIPELINE','frozen'))
+    parser.add_argument('--batch-size', type=int, default=int(os.getenv('STEGASUS_BATCH_SIZE','8')))
+    parser.add_argument('--cache-dir', type=Path, default=os.getenv('WORKER_CACHE'),help='Optional private persistent cache for direct mode; retains slides until manually removed.')
     args = parser.parse_args()
+    if not 1 <= args.batch_size <= 256:
+        parser.error('Batch size must be between 1 and 256.')
     if not args.run or bool(args.slide) != bool(args.output):
         parser.error("Set --run or STEGASUS_MODEL_RUN; --slide and --output must be supplied together.")
     run = Path(args.run).resolve()
     verify_installation(run)
     if args.slide:
-        args.output.mkdir(parents=True, exist_ok=False)
-        print(json.dumps(compute(args.slide.resolve(), args.output.resolve(), run, threading.Event()), indent=2))
+        args.output.mkdir(parents=True, exist_ok=args.pipeline=='direct')
+        print(json.dumps(compute(args.slide.resolve(), args.output.resolve(), run, threading.Event(), args.pipeline, args.batch_size), indent=2))
     elif args.check:
         print("Verified frozen source, checkpoints, calibration and runtime.")
     else:
@@ -227,7 +243,7 @@ def main():
                 service.post("worker-heartbeat")
                 assignment = service.post("worker-claim").get("job")
                 if assignment:
-                    process(service, assignment, run, limit)
+                    process(service, assignment, run, limit, args.pipeline, args.batch_size, args.cache_dir)
                     continue
             except (RuntimeError, requests.RequestException) as exc:
                 print(f"Worker network/API failure ({type(exc).__name__}); retrying.", flush=True)
