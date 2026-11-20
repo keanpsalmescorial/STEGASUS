@@ -62,10 +62,10 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
   const options=node('details');options.append(node('summary','Optional case label'),field('Case label',caseId));
   form.append(node('h3','Choose a slide'),drop,selection,options,declaration,submit,stop,progress);
   section.append(status);if(writableRoles.includes(role))section.append(form);
-  const list=node('div'),detail=node('article'),refreshButton=actionButton('Refresh jobs',()=>refresh());
+  const list=node('div'),detail=node('article'),recovery=node('section',undefined,{class:'analysis-recovery'}),refreshButton=actionButton('Refresh jobs',()=>refresh());recovery.hidden=true;
   const history=node('details',undefined,{class:'analysis-history'});history.append(node('summary','Previous analyses'),refreshButton,list);
-  const again=actionButton('Analyze another slide',()=>{selectedJobId=null;selectedJobStatus=null;viewSequence++;detail.replaceChildren();form.hidden=!writableRoles.includes(role);again.hidden=true;files.focus();});again.hidden=true;
-  section.append(feedback,detail,again,history,node('p','For investigational research use. Predictions and patch-score maps have no established clinical diagnostic or lesion-boundary validity.'));
+  const again=actionButton('Analyze another slide',()=>{selectedJobId=null;selectedJobStatus=null;viewSequence++;detail.replaceChildren();form.hidden=!writableRoles.includes(role);again.hidden=true;refresh();files.focus();});again.hidden=true;
+  section.append(feedback,recovery,detail,again,history,node('p','For investigational research use. Predictions and patch-score maps have no established clinical diagnostic or lesion-boundary validity.'));
   async function api(action,params={}) {
     const {data,error}=await client.functions.invoke('inference',{body:{action,...params}});
     if(error){
@@ -75,6 +75,14 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
     if(data?.error)throw new Error(data.error);return data;
   }
   function say(text){if(alive)feedback.textContent=text;}
+  function retryButton(j){
+    const button=actionButton('Retry saved slide: '+j.filename,async()=>{
+      button.disabled=true;
+      try{await api('retry',{jobId:j.id});selectedJobId=j.id;selectedJobStatus=null;say('Saved slide queued again. No upload was needed.');await refresh();}
+      catch(e){say(e.message);}finally{button.disabled=false;}
+    });
+    return button;
+  }
   async function exportReport(j,button){
     button.disabled=true;const images=[];
     try{
@@ -103,16 +111,18 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
     }
     box.append(node('small',view.eta));
     if(view.elapsed!==undefined)box.append(node('small',`${view.elapsed} min processing elapsed`));
-    const age=(Date.now()-Date.parse(j.created_at))/1000;
+    const age=j.status==='processing'?(j.result?.progress?.elapsedSeconds??0):(Date.now()-Date.parse(j.status==='queued'?j.updated_at:j.created_at))/1000;
     if(['processing','queued','uploading'].includes(j.status)&&age>300)box.append(node('small','Five-minute target exceeded; analysis continues.',{class:'target-exceeded'}));
     return box;
   }
   async function show(j) {
     selectedJobId=j.id;selectedJobStatus=j.status;
     form.hidden=!busy;again.hidden=busy||!writableRoles.includes(role);
+    recovery.hidden=true;
     const sequence=++viewSequence;detail.replaceChildren(node('h3',j.status==='completed'?'Your analysis report':'Your slide analysis'),node('p',j.case_id+' / '+j.filename+' / '+new Date(j.updated_at).toLocaleString()));
     if(j.error)detail.append(node('p',j.error));
     detail.append(jobProgress(j));
+    if(j.status==='failed'&&service.retryableJobIds?.includes(j.id))detail.append(retryButton(j));
     if(j.status==='uploading'&&!busy&&writableRoles.includes(role))detail.append(actionButton('Confirm upload and continue',async()=>{try{await api('finish',{jobId:j.id});await refresh();}catch(e){say(e.message);}}),actionButton('Cancel incomplete upload',async()=>{try{await api('cancel',{jobId:j.id});await refresh();}catch(e){say(e.message);}}));
     if(j.status!=='completed'||!j.result)return;
     const r=j.result,t=node('table');const header=node('tr');header.append(node('th','Result'),node('th','Value'));t.append(header);
@@ -150,6 +160,9 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
       if(!alive)return;service=availability;
       status.textContent=!service.configured?'Inference unavailable. The laboratory service requires configuration.':service.online?'Laboratory worker online.':'Laboratory worker offline. Submissions will remain queued.';
       submit.disabled=busy||!service.configured;if(error)throw new Error('Analysis history could not be loaded.');
+      const saved=data.filter(j=>j.status==='failed'&&service.retryableJobIds?.includes(j.id));
+      recovery.replaceChildren();recovery.hidden=!saved.length||Boolean(selectedJobId);
+      if(saved.length)recovery.append(node('h3','Retry saved slide'),node('p','These slides are already uploaded. Retry a failed analysis without uploading again.'),...saved.map(retryButton));
       list.replaceChildren();if(!data.length){list.append(node('p','No analysis jobs in this project.'));return;}
       const table=node('table'),head=node('tr');for(const h of ['Case','Slide','Status','Submitted'])head.append(node('th',h));table.append(head);
       for(const j of data){
@@ -177,6 +190,7 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
   form.onsubmit=async e=>{
     e.preventDefault();if(busy)return;
     if(!service.configured||!selected||!consent.checked){say('Choose a TIFF slide and confirm authorization.');return;}
+    recovery.hidden=true;
     if(!/\.tiff?$/i.test(selected.name)||selected.size<1||selected.size>service.limit){say('Choose a nonempty TIFF slide within the '+Math.floor(service.limit/1024**2)+' MiB limit.');return;}
     const file=selected,controller=new AbortController();upload=controller;busy=true;submit.disabled=files.disabled=caseId.disabled=consent.disabled=true;progress.hidden=stop.hidden=false;progress.value=0;
     let submitted=false,finishing=false;const uploadStarted=performance.now();

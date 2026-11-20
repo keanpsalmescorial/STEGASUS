@@ -18,10 +18,11 @@ class Element{
 function all(root){return [root,...root.children.filter(c=>typeof c!=='string').flatMap(all)];}
 function setup(jobs){
   globalThis.document={createElement:tag=>new Element(tag),createTextNode:text=>String(text),head:new Element('head'),querySelector:()=>null,hidden:false};
-  const client={functions:{invoke:async(name,{body})=>({data:body.action==='availability'?{configured:true,online:true,limit:2**31}:{assets:[]}})},from:()=>{
+  const calls=[];
+  const client={functions:{invoke:async(name,{body})=>{calls.push(body);return {data:body.action==='availability'?{configured:true,online:true,limit:2**31,retryableJobIds:jobs.filter(j=>j.retryable).map(j=>j.id)}:{assets:[]}};}},from:()=>{
     const query={select(){return query;},eq(){return query;},order(){return query;},limit:async()=>({data:jobs,error:null})};return query;
   }};
-  return {container:new Element('div'),client};
+  return {container:new Element('div'),client,calls};
 }
 test('new analysis starts with a simple upload and collapsed history',async()=>{
   const {container,client}=setup([]);const dispose=await mountAnalysis(container,{client,workspaceId:'w',projectId:'p',role:'researcher'});
@@ -29,6 +30,17 @@ test('new analysis starts with a simple upload and collapsed history',async()=>{
     const nodes=all(container);assert.ok(nodes.some(n=>n.tag==='button'&&n.textContent==='Analyze slide'));
     assert.equal(nodes.find(n=>n.attrs.class==='analysis-history').open,undefined);
     assert.equal(nodes.find(n=>n.attrs.placeholder==='Defaults to the slide filename').attrs.required,undefined);
+  }finally{dispose();}
+});
+test('saved-slide retry is explicit and never starts another upload',async()=>{
+  const jobs=[{id:'saved',case_id:'case',filename:'test_004.tif',status:'failed',retryable:true,created_at:new Date().toISOString(),updated_at:new Date().toISOString()}];
+  const {container,client,calls}=setup(jobs);const dispose=await mountAnalysis(container,{client,workspaceId:'w',projectId:'p',role:'researcher'});
+  try{
+    assert.equal(calls.some(b=>b.action==='retry'),false);
+    await all(container).find(n=>n.tag==='button'&&n.textContent==='Retry saved slide: test_004.tif').listeners.click();
+    assert.equal(calls.filter(b=>b.action==='retry').length,1);
+    assert.equal(calls.find(b=>b.action==='retry').jobId,'saved');
+    assert.equal(calls.some(b=>b.action==='begin'),false);
   }finally{dispose();}
 });
 test('queued analysis is followed automatically and completion reveals report without another click',async()=>{

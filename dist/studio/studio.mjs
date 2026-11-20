@@ -101,7 +101,7 @@ async function renderView(node,rev){
     return;
   }
   const here=el('div');node.append(here);
-  const {mountAnalysis}=await import('./analysis.js?v=simple-analysis-1');if(rev!==version)return;
+  const {mountAnalysis}=await import('./analysis.js?v=saved-retry-1');if(rev!==version)return;
   const dispose=await mountAnalysis(here,{client,workspaceId:workspace.id,projectId,role,user:session.user});
   if(rev!==version)dispose?.();else cleanup=dispose;
  }else if(view==='Results Library'){

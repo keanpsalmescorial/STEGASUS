@@ -24,3 +24,5 @@
 .analysis-studio .analysis-verdict{font-size:1.6rem;font-weight:700;color:#6034a4;margin-bottom:0}
 .analysis-studio article>.job-progress{max-width:none;width:100%;padding:1rem 0}
 .analysis-studio form{max-width:none}
+.analysis-recovery{padding:1rem;border:1px solid #bca3de;border-radius:.75rem;background:#f7f2ff}
+.analysis-recovery button{margin:.3rem}

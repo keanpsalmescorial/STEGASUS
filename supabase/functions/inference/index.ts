@@ -4,6 +4,7 @@ import { getSignedUrl } from 'npm:@aws-sdk/s3-request-presigner@3.750.0';
 import { FetchHttpHandler } from 'npm:@smithy/fetch-http-handler@5.0.4';
 import { finalizeUpload } from './finalize.mjs';
 import { checkedProgress } from './progress.mjs';
+import { retryState,submissionLimitMessage } from './retry.mjs';
 import { Problem,insist,checkedId,checkUpload,partLength,verifyParts,checkResult,artifactKey,PART_SIZE,FROZEN_THRESHOLD } from './validation.mjs';
 
 const setting=(name:string)=>Deno.env.get(name)||'';
@@ -117,16 +118,24 @@ async function userAction(client:Db,userId:string,b:any){
   const action=b.action;
   if(action==='availability'||action==='begin'){
     const wid=checkedId(b.workspaceId);
-    await access(client,wid,userId,action==='begin');
+    const memberRole=await access(client,wid,userId,action==='begin');
     const w=read(await client.from('inference_workers').select('last_seen').eq('workspace_id',wid).gte('last_seen',new Date(Date.now()-120000).toISOString()).limit(1));
     const configured=!!(setting('R2_BUCKET')&&setting('R2_ACCOUNT_ID')&&setting('R2_ACCESS_KEY_ID')&&setting('R2_SECRET_ACCESS_KEY')&&workerScopes()[wid]);
-    if(action==='availability')return {configured,online:!!w?.length,limit:maxFile()};
+    if(action==='availability'){
+      let retryableJobIds:string[]=[];
+      if(['owner','administrator','researcher'].includes(memberRole)){
+        let query=client.from('inference_jobs').select('id').eq('workspace_id',wid).eq('status','failed').eq('object_present',true);
+        if(!['owner','administrator'].includes(memberRole))query=query.eq('created_by',userId);
+        retryableJobIds=read(await query.order('created_at',{ascending:false}).limit(100)).map((j:any)=>j.id);
+      }
+      return {configured,online:!!w?.length,limit:maxFile(),retryableJobIds};
+    }
     insist(configured,503,'This laboratory has no configured inference service.');
     checkUpload(b,maxFile());const pid=checkedId(b.projectId);
     const project=read(await client.from('projects').select('id').eq('id',pid).eq('workspace_id',wid).maybeSingle());insist(project,404,'Choose a project in this workspace.');
     const id=crypto.randomUUID(),Key=wid+'/'+id+'/slide.tif',Bucket=bucket();
     const reservation=await client.rpc('reserve_inference',{p_id:id,p_workspace:wid,p_project:pid,p_user:userId,p_case:b.caseId.trim(),p_file:b.filename,p_size:b.size,p_workspace_limit:budget('WORKSPACE_UPLOAD_BYTES',4*1024**3),p_global_limit:budget('GLOBAL_UPLOAD_BYTES',8*1024**3)});
-    if(reservation.error?.code==='P0001')throw new Problem(429,reservation.error.message);
+    if(reservation.error?.code==='P0001')throw new Problem(429,submissionLimitMessage(reservation.error.message));
     read(reservation);let uploadId;
     try{
       const created=await r2().send(new CreateMultipartUploadCommand({Bucket,Key,ContentType:'image/tiff'}));uploadId=created.UploadId;insist(uploadId,503,'Storage could not start this upload.');
@@ -142,6 +151,14 @@ async function userAction(client:Db,userId:string,b:any){
     const assets=await Promise.all(j.artifacts.map(async(a:any)=>({kind:a.kind,mimeType:a.mimeType,url:await getSignedUrl(r2(),new GetObjectCommand({Bucket:bucket(),Key:a.key}),{expiresIn:300})})));return {assets};
   }
   insist(j.created_by===userId||['owner','administrator'].includes(role),403,'Only the submitting researcher or a workspace administrator may manage this upload.');
+  if(action==='retry'){
+    insist(j.status==='failed'&&j.object_present,409,'This analysis has no failed, verified slide to retry.');
+    const patch=retryState(j,await headSize(j.object_key),now());
+    // Fenced, atomic transition: simultaneous clicks cannot enqueue two attempts,
+    // and stale workers cannot write with the cleared lease token.
+    await guardedUpdate(client.from('inference_jobs').update(patch).eq('id',j.id).eq('status','failed').eq('object_present',true).select('id').maybeSingle());
+    return {ok:true};
+  }
   if(action==='finish'&&['queued','processing','completed'].includes(j.status))return {ok:true};
   if(action==='link-experiment'){
     const eid=checkedId(b.experimentId);
