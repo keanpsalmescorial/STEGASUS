@@ -97,7 +97,7 @@ async function renderView(node,rev){
   node.append(selectors());
   if(!projectId){node.append(p('Create a project to submit an analysis.'));return;}
   const here=el('div');node.append(here);
-  const {mountAnalysis}=await import('./analysis.js');if(rev!==version)return;
+  const {mountAnalysis}=await import('./analysis.js?v=upload-finalization-1');if(rev!==version)return;
   const dispose=await mountAnalysis(here,{client,workspaceId:workspace.id,projectId,role,user:session.user});
   if(rev!==version)dispose?.();else cleanup=dispose;
  }else if(view==='Results Library'){

@@ -116,7 +116,16 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
       const table=node('table'),head=node('tr');for(const h of ['Case','Slide','Status','Submitted'])head.append(node('th',h));table.append(head);
       for(const j of data){
         const row=node('tr'),cell=node('td');cell.append(actionButton(j.case_id,()=>show(j)));row.append(cell,node('td',j.filename),node('td',j.status),node('td',new Date(j.created_at).toLocaleDateString()));table.append(row);
-        if(j.status==='uploading'&&writableRoles.includes(role)&&j.id!==currentId){const c=node('td');c.append(actionButton('Cancel incomplete upload',async()=>{try{await api('cancel',{jobId:j.id});await refresh();}catch(e){say(e.message);}}));row.append(c);}
+        if(j.status==='uploading'&&writableRoles.includes(role)&&j.id!==currentId){
+          const c=node('td');
+          const recover=actionButton('Confirm upload and queue',async()=>{
+            recover.disabled=true;
+            try{await api('finish',{jobId:j.id});say('Upload verified. The slide is queued for laboratory analysis.');await refresh();}
+            catch(e){say('Upload could not be confirmed: '+e.message);}
+            finally{recover.disabled=false;}
+          });
+          c.append(recover,actionButton('Cancel incomplete upload',async()=>{try{await api('cancel',{jobId:j.id});await refresh();}catch(e){say(e.message);}}));row.append(c);
+        }
       }
       list.append(table);
     }catch(e){if(alive)list.replaceChildren(node('p',e.message));}finally{refreshing=false;}
@@ -141,7 +150,7 @@ export async function mountAnalysis(container,{client,workspaceId,projectId,role
       await api('finish',{jobId:currentId});submitted=true;say('Upload verified. The slide is queued for laboratory analysis.');
       form.reset();selected=null;selection.textContent='';files.required=true;
     }catch(err){
-      if(currentId&&finishing){try{await api('finish',{jobId:currentId});submitted=true;say('Upload verified. Analysis submitted.');}catch{say('Could not confirm submission. Refresh job history to inspect its state.');}}
+      if(currentId&&finishing){try{await api('finish',{jobId:currentId});submitted=true;say('Upload verified. Analysis submitted.');}catch(retryError){say('Could not confirm submission: '+retryError.message+' Use Confirm upload and queue in job history to retry without re-uploading.');}}
       else say(err.message);
       if(currentId&&!submitted&&!finishing){try{await api('cancel',{jobId:currentId});}catch{say('Transfer interrupted. Cancel the incomplete upload in job history.');}}
     }finally{

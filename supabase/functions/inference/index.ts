@@ -1,6 +1,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.49.4';
 import { S3Client,HeadBucketCommand,CreateMultipartUploadCommand,UploadPartCommand,ListPartsCommand,CompleteMultipartUploadCommand,AbortMultipartUploadCommand,HeadObjectCommand,GetObjectCommand,PutObjectCommand,DeleteObjectCommand } from 'npm:@aws-sdk/client-s3@3.750.0';
 import { getSignedUrl } from 'npm:@aws-sdk/s3-request-presigner@3.750.0';
+import { FetchHttpHandler } from 'npm:@smithy/fetch-http-handler@5.0.4';
+import { finalizeUpload } from './finalize.mjs';
 import { Problem,insist,checkedId,checkUpload,partLength,verifyParts,checkResult,artifactKey,PART_SIZE,FROZEN_THRESHOLD } from './validation.mjs';
 
 const setting=(name:string)=>Deno.env.get(name)||'';
@@ -8,7 +10,7 @@ function required(name:string){const value=setting(name).trim();insist(value,503
 function budget(name:string,fallback:number){const n=Number(setting(name)||fallback);insist(Number.isSafeInteger(n)&&n>0,503,'Inference limits are unavailable.');return n;}
 const origins=()=>setting('STEGASUS_ALLOWED_ORIGINS').split(',').map(s=>s.trim()).filter(Boolean);
 let storage:S3Client;
-function r2(){return storage??=new S3Client({region:'auto',endpoint:'https://'+required('R2_ACCOUNT_ID')+'.r2.cloudflarestorage.com',requestChecksumCalculation:'WHEN_REQUIRED',responseChecksumValidation:'WHEN_REQUIRED',credentials:{accessKeyId:required('R2_ACCESS_KEY_ID'),secretAccessKey:required('R2_SECRET_ACCESS_KEY')}});}
+function r2(){return storage??=new S3Client({region:'auto',endpoint:'https://'+required('R2_ACCOUNT_ID')+'.r2.cloudflarestorage.com',requestHandler:new FetchHttpHandler({requestTimeout:15000}),maxAttempts:3,requestChecksumCalculation:'WHEN_REQUIRED',responseChecksumValidation:'WHEN_REQUIRED',credentials:{accessKeyId:required('R2_ACCESS_KEY_ID'),secretAccessKey:required('R2_SECRET_ACCESS_KEY')}});}
 function bucket(){return required('R2_BUCKET');}
 const maxFile=()=>Math.min(budget('MAX_FILE_BYTES',2*1024**3),PART_SIZE*10000);
 function db(){return createClient(required('SUPABASE_URL'),required('SUPABASE_SERVICE_ROLE_KEY'),{auth:{persistSession:false,autoRefreshToken:false}});}
@@ -152,18 +154,17 @@ async function userAction(client:Db,userId:string,b:any){
     await r2().send(new DeleteObjectCommand({Bucket:params.Bucket,Key:params.Key}));return {ok:true};
   }
   insist(action==='finish',400,'Unknown upload action.');
-  let size=await headSize(j.object_key);
-  if(size===null){
-    const parts=await listParts(j);verifyParts(parts,j.size_bytes);
-    await r2().send(new CompleteMultipartUploadCommand({...params,MultipartUpload:{Parts:parts.map(p=>({PartNumber:p.PartNumber,ETag:p.ETag}))}}));
-    size=await headSize(j.object_key);
-  }
-  insist(size===j.size_bytes,409,'Uploaded size differs from the declared size.');
+  await finalizeUpload(j,{
+    head:()=>headSize(j.object_key),
+    parts:()=>listParts(j),
+    complete:(parts:any[])=>r2().send(new CompleteMultipartUploadCommand({...params,MultipartUpload:{Parts:parts.map(p=>({PartNumber:p.PartNumber,ETag:p.ETag}))}}))
+  });
   await guardedUpdate(client.from('inference_jobs').update({status:'queued',upload_id:null,object_present:true,updated_at:now()}).eq('id',j.id).eq('status','uploading').select('id').maybeSingle());
   return {ok:true};
 }
 
 Deno.serve(async req=>{
+  let action='unknown';
   const origin=req.headers.get('Origin');
   const headers:Record<string,string>={'Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin'};
   if(origin&&origins().includes(origin)){headers['Access-Control-Allow-Origin']=origin;headers['Access-Control-Allow-Methods']='POST, OPTIONS';headers['Access-Control-Allow-Headers']='authorization, apikey, content-type, x-client-info';}
@@ -178,8 +179,11 @@ Deno.serve(async req=>{
     while(true){const {done,value}=await reader!.read();if(done)break;length+=value.length;if(length>65536){await reader!.cancel();throw new Problem(413,'Request too large.');}chunks.push(value);}
     let b;try{b=JSON.parse(await new Blob(chunks as BlobPart[]).text());}catch{throw new Problem(400,'Invalid JSON.');}
     insist(typeof b?.action==='string',400,'Missing action.');
+    action=b.action;
     const client=db();const result=b.action.startsWith('worker-')?await worker(client,token!,b):await userAction(client,await verifiedUser(client,token!),b);
     return respond(200,result);
-  }catch(e){return respond(e instanceof Problem?e.status:503,{error:e instanceof Problem?e.message:'Inference service temporarily unavailable.'});}
+  }catch(e){
+    if(!(e instanceof Problem))console.error(JSON.stringify({event:'inference_request_failed',action:action.slice(0,50),name:String((e as any)?.name??'Error').replace(/[^\w.-]/g,'').slice(0,80),httpStatus:(e as any)?.$metadata?.httpStatusCode??null}));
+    return respond(e instanceof Problem?e.status:503,{error:e instanceof Problem?e.message:action==='finish'?'Slide storage finalization failed. Your upload has been kept; use Confirm upload and queue to retry.':'Inference service temporarily unavailable.'});
+  }
 });
-
