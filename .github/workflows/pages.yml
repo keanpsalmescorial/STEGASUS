@@ -5,18 +5,19 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-  pages: write
-  id-token: write
 concurrency:
   group: pages
   cancel-in-progress: false
 jobs:
-  publish:
+  build:
     if: github.event.repository.name == 'STEGASUS'
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.publish.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: read
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact_id }}
+      artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,8 +28,54 @@ jobs:
           find dist -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n 1 node --check
       - run: node --test tests/*.test.mjs
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - id: upload
+        uses: actions/upload-pages-artifact@v5.0.0
         with:
           path: dist
+          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.publish.outputs.page_url }}
+    steps:
+      - name: Wait for the uploaded artifact to become discoverable
+        uses: actions/github-script@v8
+        env:
+          EXPECTED_ARTIFACT_ID: ${{ needs.build.outputs.artifact_id }}
+          EXPECTED_ARTIFACT_NAME: ${{ needs.build.outputs.artifact_name }}
+        with:
+          script: |
+            const expectedId = process.env.EXPECTED_ARTIFACT_ID;
+            if (!/^\d+$/.test(expectedId)) {
+              throw new Error('Build did not return a valid Pages artifact ID.');
+            }
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let attempt = 0; attempt <= delays.length; attempt++) {
+              const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: context.runId,
+                per_page: 100
+              });
+              const artifact = artifacts.find(a => String(a.id) === expectedId &&
+                a.name === process.env.EXPECTED_ARTIFACT_NAME && !a.expired);
+              if (artifact) {
+                core.info(`Pages artifact ${artifact.id} is ready (${artifact.size_in_bytes} bytes).`);
+                return;
+              }
+              if (attempt === delays.length) break;
+              core.info('Artifact is not discoverable yet; retrying metadata lookup.');
+              await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+            }
+            throw new Error('Uploaded Pages artifact did not become discoverable within the retry window.');
       - id: publish
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5.0.1
+        with:
+          artifact_name: ${{ needs.build.outputs.artifact_name }}
