@@ -1,7 +1,8 @@
 param(
-    [ValidateSet('frozen','direct')][string]$Pipeline = 'frozen',
+    [ValidateSet('frozen','direct')][string]$Pipeline = 'direct',
     [ValidateRange(1,256)][int]$BatchSize = 8,
-    [string]$CacheDirectory = ''
+    [ValidateRange(1,16)][int]$ReadWorkers = 2,
+    [string]$CacheDirectory = (Join-Path $env:LOCALAPPDATA 'STEGASUS/worker-cache')
 )
 $ErrorActionPreference = 'Stop'
 $configPath = Join-Path $PSScriptRoot '.env'
@@ -23,8 +24,8 @@ $pythonPath = Join-Path $PSScriptRoot '../../../stegasus/.venv/Scripts/python.ex
 if (-not (Test-Path -LiteralPath $pythonPath)) {
     throw 'The laboratory Python environment is missing.'
 }
-Write-Host 'Starting the frozen STEGASUS worker. Keep this terminal open. Use Ctrl+C to stop.'
-$workerArguments = @((Join-Path $PSScriptRoot 'worker.py'),'--pipeline',$Pipeline,'--batch-size',$BatchSize)
+Write-Host "Starting STEGASUS: pipeline=$Pipeline, batch=$BatchSize, readers=$ReadWorkers. Use Ctrl+C to stop."
+$workerArguments = @((Join-Path $PSScriptRoot 'worker.py'),'--pipeline',$Pipeline,'--batch-size',$BatchSize,'--read-workers',$ReadWorkers,'--require-gpu')
 if ($CacheDirectory) { $workerArguments += @('--cache-dir',$CacheDirectory) }
 & $pythonPath @workerArguments
 exit $LASTEXITCODE

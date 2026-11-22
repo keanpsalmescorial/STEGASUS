@@ -1,0 +1,87 @@
+{
+  "device": "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "samples": 128,
+  "referenceTissuePatches": 15707,
+  "vectorized": false,
+  "thresholds": {
+    "patchAbsolute": 0.001,
+    "featureAbsolute": 0.001,
+    "featureRelative": 0.001,
+    "slideAbsolute": 0.0001
+  },
+  "results": [
+    {
+      "batchSize": 1,
+      "seconds": 20.7579,
+      "patchesPerSecond": 6.17,
+      "maxPatchScoreDifference": 0.0,
+      "perExpertMaxDifference": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maxFeatureDifference": 0.0,
+      "graphDifference": 0.0,
+      "ensembleDifference": 0.0,
+      "patchPassed": true,
+      "featuresPassed": true,
+      "slidePassed": true,
+      "passed": true
+    },
+    {
+      "batchSize": 8,
+      "seconds": 17.4802,
+      "patchesPerSecond": 7.32,
+      "maxPatchScoreDifference": 0.0,
+      "perExpertMaxDifference": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maxFeatureDifference": 0.0,
+      "graphDifference": 0.0,
+      "ensembleDifference": 0.0,
+      "patchPassed": true,
+      "featuresPassed": true,
+      "slidePassed": true,
+      "passed": true
+    },
+    {
+      "batchSize": 16,
+      "seconds": 18.7234,
+      "patchesPerSecond": 6.84,
+      "maxPatchScoreDifference": 0.0,
+      "perExpertMaxDifference": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maxFeatureDifference": 0.0,
+      "graphDifference": 0.0,
+      "ensembleDifference": 0.0,
+      "patchPassed": true,
+      "featuresPassed": true,
+      "slidePassed": true,
+      "passed": true
+    },
+    {
+      "batchSize": 32,
+      "seconds": 17.9039,
+      "patchesPerSecond": 7.15,
+      "maxPatchScoreDifference": 0.0,
+      "perExpertMaxDifference": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maxFeatureDifference": 0.0,
+      "graphDifference": 0.0,
+      "ensembleDifference": 0.0,
+      "patchPassed": true,
+      "featuresPassed": true,
+      "slidePassed": true,
+      "passed": true
+    }
+  ],
+  "scope": "Real sampled patches and full graph with sampled replacements; excludes download, reads, initialization and artifacts. Not a full-slide validation."
+}

@@ -34,7 +34,7 @@ def main():
         db.close()
         if deleted != 64:
             raise ValueError("Expected at least 64 tissue tiles in the reference.")
-        result = worker.compute(args.slide.resolve(), work, run, threading.Event())
+        result = worker.compute(args.slide.resolve(), work, run, threading.Event(), pipeline='frozen')
         outputs = {}
         for filename in ("manifest.json", "result.json", "patch_predictions.csv", "thumbnail.png", "heatmap.png"):
             got = digest(work / filename)

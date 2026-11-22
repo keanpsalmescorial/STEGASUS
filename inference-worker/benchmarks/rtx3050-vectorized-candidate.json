@@ -1,0 +1,88 @@
+{
+  "device": "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "samples": 128,
+  "referenceTissuePatches": 15707,
+  "thresholds": {
+    "patchAbsolute": 0.001,
+    "featureAbsolute": 0.001,
+    "featureRelative": 0.001,
+    "slideAbsolute": 0.0001
+  },
+  "results": [
+    {
+      "batchSize": 1,
+      "seconds": 17.6873,
+      "patchesPerSecond": 7.24,
+      "maxPatchScoreDifference": 0.0,
+      "perExpertMaxDifference": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "maxFeatureDifference": 0.0,
+      "graphDifference": 0.0,
+      "ensembleDifference": 0.0,
+      "patchPassed": true,
+      "featuresPassed": true,
+      "slidePassed": true,
+      "passed": true
+    },
+    {
+      "batchSize": 8,
+      "seconds": 2.4218,
+      "patchesPerSecond": 52.85,
+      "maxPatchScoreDifference": 0.0024894848465919495,
+      "perExpertMaxDifference": [
+        0.0019051432609558105,
+        0.0024894848465919495,
+        0.00158005952835083
+      ],
+      "maxFeatureDifference": 0.003299027681350708,
+      "graphDifference": 5.820766091346741E-09,
+      "ensembleDifference": 3.392856273709555E-08,
+      "patchPassed": false,
+      "featuresPassed": false,
+      "slidePassed": true,
+      "passed": false
+    },
+    {
+      "batchSize": 16,
+      "seconds": 1.5648,
+      "patchesPerSecond": 81.8,
+      "maxPatchScoreDifference": 0.001834869384765625,
+      "perExpertMaxDifference": [
+        0.0010450482368469238,
+        0.001834869384765625,
+        0.0010622143745422363
+      ],
+      "maxFeatureDifference": 0.0025671720504760742,
+      "graphDifference": 0.0,
+      "ensembleDifference": 0.0,
+      "patchPassed": false,
+      "featuresPassed": false,
+      "slidePassed": true,
+      "passed": false
+    },
+    {
+      "batchSize": 32,
+      "seconds": 1.0437,
+      "patchesPerSecond": 122.64,
+      "maxPatchScoreDifference": 0.0022409260272979736,
+      "perExpertMaxDifference": [
+        0.0021333694458007812,
+        0.0022409260272979736,
+        0.0021277666091918945
+      ],
+      "maxFeatureDifference": 0.0023473799228668213,
+      "graphDifference": 9.313225746154785E-09,
+      "ensembleDifference": 5.428566285381464E-08,
+      "patchPassed": false,
+      "featuresPassed": false,
+      "slidePassed": true,
+      "passed": false
+    }
+  ],
+  "scope": "Real sampled patches and full graph with sampled replacements; excludes download, reads, initialization and artifacts. Not a full-slide validation.",
+  "vectorized": true,
+  "disposition": "Experimental; patch and feature regression gates failed; excluded from serving worker."
+}

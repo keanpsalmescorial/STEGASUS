@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 from uuid import UUID
+from file_lock import exclusive_lock
 
 
 def sha256(path):
@@ -13,15 +14,9 @@ def sha256(path):
 
 @contextmanager
 def job_directory(root,job_id):
-    import msvcrt
     base=Path(root).resolve()/str(UUID(job_id))
     base.mkdir(parents=True,exist_ok=True)
-    with (base/'job.lock').open('a+b') as lock:
-        lock.seek(0)
-        if not lock.read(1):
-            lock.write(b'0');lock.flush()
-        lock.seek(0)
-        msvcrt.locking(lock.fileno(),msvcrt.LK_NBLCK,1)
+    with exclusive_lock(base/'job.lock'):
         yield base
 
 

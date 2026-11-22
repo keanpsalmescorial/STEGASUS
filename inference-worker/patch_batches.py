@@ -14,7 +14,7 @@ def read_patch(slide, x, y, level, region):
 
 
 @torch.inference_mode()
-def infer_batch(images, models, transforms, device):
+def infer_batch(images, models, transforms, device, vectorized=False):
     """Return aligned three-expert scores and the original expert-0 graph features."""
     if not images:
         return [], []
@@ -23,25 +23,45 @@ def infer_batch(images, models, transforms, device):
     scores = np.empty((len(images), 3), dtype=np.float64)
     features_out = None
     for j, (model, transform) in enumerate(zip(models, transforms)):
-        tensor = torch.stack([transform(image) for image in images]).to(device)
-        if j == 0:
-            features_out = []
-        # Preserve the frozen batch-one forward shape: vectorized CUDA kernels
-        # exhibited score drift in regression. Batching still reduces transfers,
-        # preprocessing overhead and SQLite commits; weights stay on the device.
-        for i in range(len(images)):
-            features = model.forward_features(tensor[i:i+1])
-            scores[i,j] = float(model.forward_head(features).sigmoid().item())
+        tensor = torch.stack([transform(image) for image in images])
+        if str(device).startswith('cuda'):
+            tensor = tensor.pin_memory()
+        tensor = tensor.to(device, non_blocking=str(device).startswith('cuda'))
+        # Reference-shape mode queues all forwards before a single CPU transfer.
+        # Vectorization is explicit/experimental until its numerical gates pass.
+        score_parts, feature_parts = [], []
+        chunks = [tensor] if vectorized else tensor.split(1)
+        for chunk in chunks:
+            features = model.forward_features(chunk)
+            score_parts.append(model.forward_head(features).sigmoid().reshape(-1))
             if j == 0:
-                features_out.append(model.forward_head(features,pre_logits=True).cpu().numpy().astype('float32').reshape(-1).tobytes())
-            del features
-        del tensor
+                feature_parts.append(model.forward_head(features, pre_logits=True))
+        scores[:, j] = torch.cat(score_parts).cpu().numpy()
+        if j == 0:
+            encoded = torch.cat(feature_parts).cpu().numpy().astype('float32')
+            features_out = [row.reshape(-1).tobytes() for row in encoded]
+        del features, tensor
     return scores.tolist(), features_out
 
 
-def commit_batch(db, pending, models, transforms, device):
+def infer_with_memory_fallback(images, models, transforms, device, vectorized=False):
+    """Split a batch on CUDA OOM without dropping patches or changing precision."""
+    try:
+        return infer_batch(images, models, transforms, device, vectorized=vectorized)
+    except torch.cuda.OutOfMemoryError:
+        if len(images) <= 1:
+            raise
+    # Outside the except block so failed-forward tracebacks release GPU tensors.
+    torch.cuda.empty_cache()
+    middle = len(images) // 2
+    left = infer_with_memory_fallback(images[:middle], models, transforms, device, vectorized)
+    right = infer_with_memory_fallback(images[middle:], models, transforms, device, vectorized)
+    return left[0] + right[0], left[1] + right[1]
+
+
+def commit_batch(db, pending, models, transforms, device, vectorized=False):
     accepted = [item for item in pending if item[3] is not None]
-    scores, features = infer_batch([item[3] for item in accepted], models, transforms, device)
+    scores, features = infer_with_memory_fallback([item[3] for item in accepted], models, transforms, device, vectorized)
     index = 0
     rows = []
     for x, y, fraction, image in pending:

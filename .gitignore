@@ -1,6 +1,7 @@
 .env
 .env.*
 !.env.example
+!.env.gpu.example
 __pycache__/
 *.pyc
 *.tmp

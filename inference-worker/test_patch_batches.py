@@ -1,11 +1,12 @@
 """Local regression checks; no queue, network, training or whole-slide inference."""
 import sqlite3
 import unittest
+from unittest.mock import patch
 import numpy as np
 import torch
 from PIL import Image
 from torchvision import transforms as T
-from patch_batches import read_patch, infer_batch, commit_batch
+from patch_batches import read_patch, infer_batch, commit_batch, infer_with_memory_fallback
 
 
 class Slide:
@@ -22,6 +23,25 @@ class Expert(torch.nn.Module):
 
 
 class Tests(unittest.TestCase):
+    def test_each_expert_receives_full_batch_in_one_forward(self):
+        class Counter(Expert):
+            def forward_features(self, x):
+                self.sizes = getattr(self, 'sizes', []) + [x.shape[0]]
+                return super().forward_features(x)
+        models = [Counter() for _ in range(3)]
+        images = [Image.new('RGB', (96,96), 'purple')]*8
+        infer_batch(images, models, [T.ToTensor()]*3, 'cpu', vectorized=True)
+        self.assertEqual([model.sizes for model in models], [[8],[8],[8]])
+
+    def test_oom_splits_without_losing_or_reordering_patches(self):
+        def fake(images, *args, **kwargs):
+            if len(images)>2: raise torch.cuda.OutOfMemoryError()
+            return images, images
+        with patch('patch_batches.infer_batch', fake), patch('torch.cuda.empty_cache'):
+            scores, features = infer_with_memory_fallback(list(range(7)), [], [], 'cuda')
+        self.assertEqual(scores, list(range(7)))
+        self.assertEqual(features, list(range(7)))
+
     def test_pixels_and_tissue_equal_frozen_operations(self):
         for region in [(96,96),(131,80),(1,1)]:
             slide=Slide()

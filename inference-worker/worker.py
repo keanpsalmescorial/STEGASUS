@@ -4,6 +4,7 @@ import csv
 import hashlib
 import json
 import math
+import logging
 import os
 from pathlib import Path, PureWindowsPath
 import shutil
@@ -18,6 +19,8 @@ from uuid import UUID
 import requests
 from job_cache import job_directory, verified_download
 from progress_report import Progress
+from worker_connection import ApiError, LeaseGuard, retry
+from resident_engine import ResidentEngine
 
 ROOT = Path(__file__).resolve().parent
 FROZEN = ROOT / "frozen"
@@ -33,8 +36,6 @@ ARTIFACTS = {
 
 
 def verify_installation(run):
-    if sys.platform != "win32":
-        raise RuntimeError("The frozen WSI entry point requires Windows.")
     hashes = json.loads((ROOT / "frozen-hashes.json").read_text())
     for name, expected in hashes.items():
         parts = PureWindowsPath(name).parts
@@ -95,8 +96,14 @@ class Service:
                                  headers={"Authorization": "Bearer " + self.token}, timeout=(10, 30),
                                  allow_redirects=False)
         if not 200 <= response.status_code < 300:
-            raise RuntimeError(f"Worker API returned HTTP {response.status_code}.")
+            raise ApiError(response.status_code)
         return response.json()
+
+    def reliable_post(self, action, **payload):
+        # Claim is intentionally excluded: a lost response must not claim twice.
+        if action not in {'worker-heartbeat', 'worker-artifact', 'worker-complete', 'worker-fail'}:
+            return self.post(action, **payload)
+        return retry(lambda: self.post(action, **payload))
 
 
 def signed_url(url):
@@ -128,7 +135,7 @@ def fetch_slide(url, target, lost, limit, expected_size, progress=None):
         raise RuntimeError("Incomplete input transfer.")
 
 
-def compute(slide, output, run, lost, pipeline='frozen', batch_size=8, progress=None):
+def compute(slide, output, run, lost, pipeline='direct', batch_size=8, progress=None, read_workers=2, engine=None):
     if progress:progress.update('preparing')
     if slide.suffix.lower() not in (".tif", ".tiff"):
         raise ValueError("Accepted input is a pyramidal research TIFF.")
@@ -143,19 +150,27 @@ def compute(slide, output, run, lost, pipeline='frozen', batch_size=8, progress=
     args = [sys.executable, str(entry), "--slide", str(slide),
             "--output", str(output), "--run", str(run)]
     if pipeline == 'direct':
-        args += ['--batch-size', str(batch_size)]
+        args += ['--batch-size', str(batch_size), '--read-workers', str(read_workers)]
+    if pipeline == 'direct' and engine is not None:
+        engine.compute(args[2:],output,lost,progress)
+        return score_artifacts(output)
     # Restrict the child to local model computation; keep worker credentials out.
     env = {k: v for k, v in os.environ.items() if k not in {"WORKER_TOKEN", "SUPABASE_SERVICE_ROLE_KEY",
                                                              "AWS_SECRET_ACCESS_KEY", "R2_SECRET_ACCESS_KEY"}}
-    child = subprocess.Popen(args, env=env,**({'stdout':subprocess.PIPE,'text':True,'bufsize':1} if progress else {}))
-    reader=None
-    if progress:
-        def read_output():
+    output.mkdir(parents=True, exist_ok=True)
+    child = subprocess.Popen(args, env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+                             text=True,bufsize=1)
+    def read_output():
+        # Child contains no worker credentials or private signed storage URLs.
+        # Keep its actual traceback locally instead of reporting only its class.
+        with (output/'processing.log').open('a',encoding='utf-8') as log:
             for line in child.stdout:
-                progress.line(line)
+                log.write(line); log.flush()
+                if progress:
+                    progress.line(line)
                 print(line,end='',flush=True)
-        reader=threading.Thread(target=read_output,daemon=True)
-        reader.start()
+    reader=threading.Thread(target=read_output,daemon=True)
+    reader.start()
     try:
         while child.poll() is None:
             if lost.wait(1):
@@ -165,29 +180,36 @@ def compute(slide, output, run, lost, pipeline='frozen', batch_size=8, progress=
     finally:
         if child.poll() is None:
             child.terminate()
-            child.wait()
+            try:
+                child.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                child.kill(); child.wait()
         if reader:
             reader.join(timeout=5)
             if not reader.is_alive():child.stdout.close()
     return score_artifacts(output)
 
 
-def process(service, job, run, limit, pipeline='frozen', batch_size=8, cache_dir=None):
+def process(service, job, run, limit, pipeline='direct', batch_size=8, cache_dir=None, read_workers=2, engine=None):
     lease = {"jobId": str(UUID(job["id"])), "leaseToken": job["lease_token"]}
     stop, lost = threading.Event(), threading.Event()
     report=Progress(pipeline)
-    try:
-        profile=service.post('worker-timing-profile',pipeline=pipeline,size=job['size_bytes'])
-        report.expected_total=profile.get('expectedSeconds')
-    except (RuntimeError,requests.RequestException):
-        pass
+    guard = LeaseGuard(job.get('lease_until'))
+    # Older direct timing profiles describe another implementation. Stage ETA is
+    # measured live; avoid a needless network call before its first heartbeat.
+    if pipeline=='frozen':
+        try:
+            profile=service.post('worker-timing-profile',pipeline=pipeline,size=job['size_bytes'])
+            report.expected_total=profile.get('expectedSeconds')
+        except (RuntimeError,requests.RequestException):
+            pass
 
     def keep_lease():
-        while not stop.wait(10):
-            try:
-                service.post("worker-heartbeat", **lease, progress=report.snapshot())
-            except (RuntimeError, requests.RequestException):
+        while not stop.is_set():
+            if not guard.heartbeat(lambda: service.post("worker-heartbeat", **lease, progress=report.snapshot())):
                 lost.set()
+                break
+            if stop.wait(10):
                 break
 
     watcher = threading.Thread(target=keep_lease, daemon=True)
@@ -208,29 +230,38 @@ def process(service, job, run, limit, pipeline='frozen', batch_size=8, cache_dir
                 print('Verified input cache reused.' if reused else 'Input downloaded and verified.',flush=True)
             else:
                 fetch_slide(job["downloadUrl"], slide, lost, limit, job["size_bytes"],report)
-            stage = "frozen computation"
-            result = compute(slide, base / "outputs", run, lost, pipeline, batch_size,report)
+            stage = "model computation"
+            # Separate versioned output cache: never mix old batch-one features
+            # with vectorized results. The verified source TIFF can be reused.
+            output = base / ('outputs-direct-gpu-v3' if pipeline=='direct' else 'outputs')
+            result = compute(slide, output, run, lost, pipeline, batch_size,report,read_workers,engine)
             stage = "artifact transfer"
             report.update('artifacts',0,len(ARTIFACTS))
             artifacts = []
             for kind, (filename, mime) in ARTIFACTS.items():
                 if lost.is_set():
                     raise RuntimeError("Lease lost.")
-                target = service.post("worker-artifact", **lease, kind=kind, mimeType=mime)
-                with (base / "outputs" / filename).open("rb") as stream:
-                    response = requests.put(signed_url(target["uploadUrl"]), data=stream,
+                target = service.reliable_post("worker-artifact", **lease, kind=kind, mimeType=mime)
+                def upload():
+                    with (output / filename).open("rb") as stream:
+                        response = requests.put(signed_url(target["uploadUrl"]), data=stream,
                                             headers={"Content-Type": mime}, timeout=(15, 120), allow_redirects=False)
-                    if not 200 <= response.status_code < 300:
-                        raise RuntimeError("Private artifact upload failed.")
+                        if not 200 <= response.status_code < 300:
+                            raise ApiError(response.status_code)
+                retry(upload, wait=stop.wait, stopped=lost.is_set)
                 artifacts.append(dict(kind=kind, key=target["key"], mimeType=mime))
                 report.update('artifacts',len(artifacts),len(ARTIFACTS))
             if not lost.is_set():
                 report.update('complete')
-                service.post("worker-complete", **lease, result=result, artifacts=artifacts,progress=report.snapshot())
+                service.reliable_post("worker-complete", **lease, result=result, artifacts=artifacts,progress=report.snapshot())
     except Exception as exc:
+        logging.error('Job %s stopped in %s (%s).', lease['jobId'], stage, type(exc).__name__)
         # Exclude paths, signed URLs and credentials from remote error records.
         if not lost.is_set():
-            service.post("worker-fail", **lease, error=f"Failed during {stage} ({type(exc).__name__}).")
+            try:
+                service.reliable_post("worker-fail", **lease, error=f"Failed during {stage} ({type(exc).__name__}).")
+            except (RuntimeError, requests.RequestException):
+                logging.error('Failure notification unavailable; cached work is retained.')
         print(f"Job stopped during {stage} ({type(exc).__name__}).", flush=True)
     finally:
         stop.set()
@@ -243,35 +274,54 @@ def main():
     parser.add_argument("--slide", type=Path, help="Run the frozen model on one authorized local TIFF.")
     parser.add_argument("--output", type=Path, help="New directory for local computation outputs.")
     parser.add_argument("--run", type=Path, default=os.getenv("STEGASUS_MODEL_RUN"))
-    parser.add_argument('--pipeline', choices=['frozen','direct'], default=os.getenv('STEGASUS_PIPELINE','frozen'))
+    parser.add_argument('--pipeline', choices=['frozen','direct'], default=os.getenv('STEGASUS_PIPELINE','direct'))
     parser.add_argument('--batch-size', type=int, default=int(os.getenv('STEGASUS_BATCH_SIZE','8')))
+    parser.add_argument('--read-workers', type=int, default=int(os.getenv('STEGASUS_READ_WORKERS','2')))
+    parser.add_argument('--require-gpu', action='store_true', default=os.getenv('STEGASUS_REQUIRE_GPU')=='1')
     parser.add_argument('--cache-dir', type=Path, default=os.getenv('WORKER_CACHE'),help='Optional private persistent cache for direct mode; retains slides until manually removed.')
     args = parser.parse_args()
     if not 1 <= args.batch_size <= 256:
         parser.error('Batch size must be between 1 and 256.')
+    if not 1 <= args.read_workers <= 16:
+        parser.error('Read workers must be between 1 and 16.')
+    if args.pipeline=='frozen' and sys.platform!='win32':
+        parser.error('The reference frozen entry point is Windows-only; use --pipeline direct on Linux.')
     if not args.run or bool(args.slide) != bool(args.output):
         parser.error("Set --run or STEGASUS_MODEL_RUN; --slide and --output must be supplied together.")
     run = Path(args.run).resolve()
     verify_installation(run)
+    import torch
+    if args.require_gpu and not torch.cuda.is_available():
+        raise RuntimeError('GPU required but CUDA is unavailable. No jobs claimed.')
+    print(f'Worker configuration: pipeline={args.pipeline}, batch={args.batch_size}, readers={args.read_workers}, CUDA={torch.cuda.is_available()}',flush=True)
     if args.slide:
         args.output.mkdir(parents=True, exist_ok=args.pipeline=='direct')
-        print(json.dumps(compute(args.slide.resolve(), args.output.resolve(), run, threading.Event(), args.pipeline, args.batch_size), indent=2))
+        print(json.dumps(compute(args.slide.resolve(), args.output.resolve(), run, threading.Event(), args.pipeline, args.batch_size,read_workers=args.read_workers), indent=2))
     elif args.check:
         print("Verified frozen source, checkpoints, calibration and runtime.")
     else:
         service = Service()
         limit = int(os.getenv("WORKER_MAX_BYTES", str(5 * 1024**3)))
-        while True:
-            try:
-                service.post("worker-heartbeat")
-                assignment = service.post("worker-claim").get("job")
-                if assignment:
-                    process(service, assignment, run, limit, args.pipeline, args.batch_size, args.cache_dir)
-                    continue
-            except (RuntimeError, requests.RequestException) as exc:
-                print(f"Worker network/API failure ({type(exc).__name__}); retrying.", flush=True)
-            time.sleep(15)
+        engine = ResidentEngine() if args.pipeline=='direct' else None
+        try:
+            while True:
+                try:
+                    service.post("worker-heartbeat")
+                    assignment = service.post("worker-claim").get("job")
+                    if assignment:
+                        process(service, assignment, run, limit, args.pipeline, args.batch_size, args.cache_dir,args.read_workers,engine)
+                        continue
+                except (RuntimeError, requests.RequestException) as exc:
+                    print(f"Worker network/API failure ({type(exc).__name__}); retrying.", flush=True)
+                time.sleep(15)
+        finally:
+            if engine:
+                engine.close()
 
 
 if __name__ == "__main__":
+    import signal
+    def terminate(signum, frame):
+        raise KeyboardInterrupt
+    signal.signal(signal.SIGTERM, terminate)
     main()

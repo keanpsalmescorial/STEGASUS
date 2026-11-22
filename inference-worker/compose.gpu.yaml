@@ -1,0 +1,38 @@
+services:
+  worker:
+    build: .
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 90s
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    tmpfs:
+      - /tmp:size=2147483648,mode=1777
+    environment:
+      SUPABASE_URL: ${SUPABASE_URL:?Set the existing Studio Supabase URL}
+      WORKER_TOKEN: ${WORKER_TOKEN:?Set a private workspace-scoped worker token}
+      WORKER_ID: ${WORKER_ID:?Set a unique hosted worker ID}
+      STEGASUS_BATCH_SIZE: ${STEGASUS_BATCH_SIZE:-32}
+      STEGASUS_READ_WORKERS: ${STEGASUS_READ_WORKERS:-4}
+      WORKER_MAX_BYTES: ${WORKER_MAX_BYTES:-5368709120}
+    volumes:
+      - type: bind
+        source: ${MODEL_DIRECTORY:?Set the private absolute model directory}
+        target: /models
+        read_only: true
+      - worker-cache:/cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+volumes:
+  worker-cache:

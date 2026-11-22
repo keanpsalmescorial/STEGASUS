@@ -1,0 +1,12 @@
+*
+!Dockerfile
+!requirements.txt
+!*.py
+!frozen-hashes.json
+!frozen/
+!frozen/*.py
+test_*.py
+check_*.py
+benchmark_*.py
+**/__pycache__
+**/*.pyc
