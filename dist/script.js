@@ -99,15 +99,15 @@ function search(term){
 $("search").addEventListener("submit",e=>{e.preventDefault();search($("query").value)});
 document.querySelectorAll(".chips button").forEach(b=>b.addEventListener("click",()=>{$("query").value=b.textContent;search(b.textContent)}));
 function tableDetail(t){
-  const detail=node("details",undefined,"table-card");detail.append(node("summary",(t.number?"Table "+t.number+" � ":"")+t.title));
+  const detail=node("details",undefined,"table-card");detail.append(node("summary",(t.number?"Table "+t.number+" · ":"")+t.title));
   const wrap=node("div",undefined,"scroll-table"),table=node("table",undefined,"report-table"),head=table.createTHead().insertRow();
   t.columns.forEach(v=>{const th=node("th",v);th.scope="col";head.append(th)});
   const tbody=table.createTBody();t.rows.forEach(row=>{const tr=tbody.insertRow();row.forEach(v=>tr.append(node("td",v)))});
   wrap.append(table);detail.append(wrap);if(t.note)detail.append(node("p",t.note));return detail;
 }
 function numeric(v){
-  const text=String(v??"").trim().replaceAll(",","").replace("-","-");
-  const match=text.match(/^(-?(?:\d+(?:\.\d*)?|\.\d+))\s*(%?)(?:\s*(?:�|\(|\[).*|\s*)$/);
+  const text=String(v??"").trim().replaceAll(",","").replace("−","-");
+  const match=text.match(/^(-?(?:\d+(?:\.\d*)?|\.\d+))\s*(%?)(?:\s*(?:±|\(|\[).*|\s*)$/);
   return match?{value:Number(match[1]),printed:text}:null;
 }
 function interactiveTableChart(slot,tables){
@@ -115,8 +115,8 @@ function interactiveTableChart(slot,tables){
   tables.forEach(t=>t.columns.forEach((col,i)=>{
     if(i===0||/difference|seed|threshold|raw p|holm|confusion/i.test(col))return;
     const seedCol=t.columns.indexOf("Seed");
-    const values=t.rows.map(r=>({label:r[0]+(seedCol>=0?" � seed "+r[seedCol]:""),num:numeric(r[i])})).filter(x=>x.num&&x.num.value>=0);
-    if(values.length>=2&&new Set(values.map(v=>v.label)).size>1)options.push({label:(t.number?"Table "+t.number+" � ":"")+col,values});
+    const values=t.rows.map(r=>({label:r[0]+(seedCol>=0?" · seed "+r[seedCol]:""),num:numeric(r[i])})).filter(x=>x.num&&x.num.value>=0);
+    if(values.length>=2&&new Set(values.map(v=>v.label)).size>1)options.push({label:(t.number?"Table "+t.number+" · ":"")+col,values});
   }));
   if(!options.length)return;
   const chart=node("div"),label=node("label","Compare a reported measure ", "plot-label"),select=node("select");
@@ -125,30 +125,33 @@ function interactiveTableChart(slot,tables){
   const update=()=>{chart.replaceChildren();const values=options[Number(select.value)].values,scale=Math.max(1,...values.map(v=>v.num.value));plot(chart,values.map(v=>[v.label,v.num.value,v.num.printed]),scale)};
   select.addEventListener("change",update);update();
 }
-function sourceGroup(id,tables){
-  if(!tables.length)return;const slot=$(id);interactiveTableChart(slot,tables);tables.forEach(t=>slot.append(tableDetail(t)));
+function sourceGroup(id,tables,withChart=true){
+  if(!tables.length)return;const slot=$(id);if(withChart)interactiveTableChart(slot,tables);tables.forEach(t=>slot.append(tableDetail(t)));
 }
 function renderData(data,comparison){
   manuscript=data;
+  renderEvidence(comparison);
   $("abstract-text").textContent=Array.isArray(data.abstract)?data.abstract.join(" "):data.abstract;
   const tables=data.tables??[],figures=data.figures??[];
-  sourceGroup("expert-tables",[comparison,...tables.filter(t=>t.number>=15&&t.number<=19)]);
+  sourceGroup("expert-tables",[comparison,...tables.filter(t=>t.number>=15&&t.number<=19)],false);
   sourceGroup("benchmark-tables",tables.filter(t=>t.number>=25&&t.number<=32));
   sourceGroup("ablation-tables",tables.filter(t=>(t.number>=11&&t.number<=13)||(t.number>=20&&t.number<=23)));
   const addFigure=(id,num)=>{
     const f=figures.find(x=>x.number===num);
     if(!f?.src)return;
-    const d=node("details",undefined,"figure-card");d.append(node("summary","Figure "+num+" � "+f.caption.split(". ")[0]));
-    const img=node("img");img.alt=f.caption;img.loading="lazy";img.src=f.src;d.append(img,node("p",f.caption));$(id).append(d);
+    const d=node("figure",undefined,"evidence-figure");
+    const img=node("img");img.alt=f.caption;img.loading="lazy";img.src=f.src;
+    const link=node("a");link.href=f.src;link.target="_blank";link.rel="noopener";link.setAttribute("aria-label","Open supporting research figure at full size");link.append(img);
+    d.append(link,node("figcaption",f.caption));$(id).append(d);
   };
-  for(const [id,nums] of Object.entries({primary:[13],experts:[8,11,12],slides:[15],benchmarks:[17,18,19],methodology:[1,2],findings:[20,21,22]})){
+  for(const [id,nums] of Object.entries({primary:[13],experts:[8],slides:[15],benchmarks:[17,19],methodology:[1],findings:[21,22]})){
     nums.forEach(num=>addFigure(id,num));
   }
   const archive=$("archive");archive.replaceChildren();const label=node("label","Filter records "),input=node("input");
   input.type="search";input.placeholder="Title, model, or table number";label.append(input);archive.append(label);
   const cards=[];
   for(const t of tables){const detail=tableDetail(t);detail.id="table-"+t.number;archive.append(detail);cards.push(detail)}
-  for(const f of figures){if(!f.caption)continue;const detail=node("details",undefined,"figure-card");detail.id="figure-"+f.number;detail.append(node("summary",/^figure\s+\d/i.test(f.caption)?f.caption:"Figure "+f.number+" � "+f.caption));
+  for(const f of figures){if(!f.caption)continue;const detail=node("details",undefined,"figure-card");detail.id="figure-"+f.number;detail.append(node("summary",/^figure\s+\d/i.test(f.caption)?f.caption:"Figure "+f.number+" · "+f.caption));
     if(f.src){const img=node("img");img.alt=f.caption;img.loading="lazy";img.src=f.src;detail.append(img)}else detail.append(node("p","Caption available in the manuscript. Image unavailable in this edition."));archive.append(detail);cards.push(detail);
   }
   const report=node("p");report.setAttribute("role","status");archive.append(report);
@@ -168,3 +171,24 @@ if(!matchMedia("(prefers-reduced-motion: reduce)").matches){
   });
 }
 
+
+function insight(label,score,title,description){
+  const card=node("aside",undefined,"evidence-insight");
+  card.append(node("p",label,"kicker"),node("strong",score),node("h4",title),node("p",description));return card;
+}
+function renderEvidence(comparison){
+  $("primary").insertBefore(insight("Main finding","37 / 48","Positive internal groups detected","At the selected threshold, 37 positive groups were detected and 11 were missed. All 80 negative groups were classified as negative. These counts explain the reported sensitivity and specificity."),$("primary-chart").parentElement);
+  $("slides").insertBefore(insight("Whole-slide finding","6 / 10","Positive whole slides detected","The frozen pipeline correctly classified all ten negative slides and six positive slides in the selected 20-slide cohort. Whole-slide results are reported separately from the internal source-slide groups."),$("slide-chart").parentElement);
+  const slot=$("expert-tables"),layout=node("div",undefined,"comparison-story"),chart=node("div"),label=node("label","Compare experts by ","plot-label"),select=node("select"),summary=node("p",undefined,"chart-caption");
+  select.setAttribute("aria-label","Expert comparison metric");
+  for(const metric of ["Brier score","AUROC","Sensitivity","Accuracy","Log loss"]){const option=node("option",metric);option.value=metric;select.append(option)}
+  label.append(select);chart.append(label);const bars=node("div");chart.append(bars,summary);
+  const update=()=>{const metric=select.value,index=comparison.columns.indexOf(metric);bars.replaceChildren();const values=comparison.rows.map(row=>[row[0],Number(row[index]),row[index]]);plot(bars,values,Math.max(1,...values.map(row=>row[1])));summary.textContent=(/Brier|Log loss/.test(metric)?"Lower values indicate smaller probability error.":"Higher values indicate stronger performance on this measure.")+" Same 128 internal source-slide groups; bars start at zero."};
+  select.addEventListener("change",update);update();
+  layout.append(chart,insight("Probability quality","0.0565","Lowest recorded Brier score","The ensemble had lower probability error than the individual experts and simple averaging in this comparison. The Spatial Graph Expert had stronger sensitivity and AUROC; each measure answers a different question."));slot.before(layout);
+  $("benchmarks").insertBefore(insight("Reading the comparison","3 seeds","Compare performance and stability","CLAM, DTFD-MIL, and CAMIL were adapted to shared features. Read the primary comparison alongside variation across training seeds. Cached-feature inference timings exclude slide reading and encoder computation."),$("benchmark-tables"));
+}
+if("IntersectionObserver" in window&&!matchMedia("(prefers-reduced-motion: reduce)").matches){
+  const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){entry.target.classList.add("is-visible");observer.unobserve(entry.target)}},{threshold:.08});
+  document.querySelectorAll("main>section:not(.hero),.metrics-wrap").forEach(section=>{section.classList.add("reveal");observer.observe(section)});
+}
