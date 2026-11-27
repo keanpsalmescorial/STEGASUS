@@ -1,34 +1,44 @@
 {
-  "source": "MCST-ADS-ASNHS-Manuscript-D1.docx",
-  "version": "November 2026",
+  "source": "MCS-T-ADS-ASNHS-Manuscript.docx",
+  "version": "27 November 2026",
   "title": "STEGASUS: A Four-Expert Computational Framework for Breast Cancer Lymph-Node Metastasis Detection Using Patch-Based Deep Learning, Spatial Graph Analysis, and Calibrated Logistic Stacking",
-  "abstract": "Detecting small metastatic deposits in breast cancer lymph-node tissue remains challenging for computational pathology. This study developed STEGASUS, a four-expert framework integrating EfficientNetB0, MobileViT-XXS, ResNet50, and a Spatial Graph Expert through calibrated logistic stacking. PatchCamelyon patches were grouped into 216 training, 54 development, and 128 labeled test source-slide groups. Matched spatial controls, expert-removal analyses, and supplementary shared-feature CLAM, DTFD-MIL, and channel attention-based CAMIL comparisons examined performance. The frozen ensemble achieved 91.41% accuracy, 77.08% sensitivity, 100.00% specificity, and AUROC of 0.9945. Its Brier score of 0.0565 and log loss of 0.2072 were lower than those of the primary supplementary comparators, while Spatial Graph and DTFD-MIL achieved stronger threshold-specific detection. Adjusted primary average-precision tests did not establish an ensemble advantage. DTFD-MIL had the most stable AP across three seeds; CAMIL showed substantial variation. STEGASUS detected 17 of 27 internal micrometastasis groups and 20 of 21 macrometastasis groups. Frozen processing of 20 selected CAMELYON16 WSIs yielded 80.00% accuracy and 60.00% sensitivity. Supplementary evaluation covered 85,054 CAMELYON17-WILDS patches from 10 slides and nine patients; all slides appeared in the prior inventory, and all sampled bags were positive. These limitations prevented a claim of independent whole-slide validation. A public research website and local analysis host were implemented, with end-to-end upload verification and participant usability outcomes unestablished. Findings supported computational feasibility and lower sampled probability error while identifying micrometastasis detection and independent validation as priorities.",
+  "abstract": "The detection of small metastatic deposits in breast cancer lymph-node tissue remains difficult. This study developed STEGASUS by combining EfficientNetB0, MobileViT-XXS, ResNet50, and a Spatial Graph Expert through calibrated logistic stacking. PatchCamelyon patches were divided into 216 training, 54 development, and 128 labeled test source-slide groups. We compared our performance to matched spatial controls, expert-removal analyses, and shared-feature CLAM, DTFD-MIL, and CAMIL models. Our frozen ensemble performed at 91.41% accuracy, 77.08% sensitivity, 100.00% specificity, and an AUROC of 0.9945. Our ensemble's Brier score (0.0565) and log loss (0.2072) were lower than the primary supplemental comparators; however, the Spatial Graph and DTFD-MIL models performed better than the ensemble with respect to threshold-specific detection.  DTFD-MIL had the most stable AP across three seeds; CAMIL varied substantially. STEGASUS identified 17 out of 27 micrometastasis clusters and 20 out of 21 macrometastasis groups. Frozen Inference conducted on 20 selected CAMELYON16 whole slide images (WSIs) achieved 80.00% accuracy and 60.00% sensitivity. The CAMELYON17-WILDS evaluation encompassed 85,054 patches derived from ten previously cataloged slides representing nine patients; every sampled bag contained positive instances. Predictions for ten sentinel lymph node (SLN) breast slides resulted in 80.00% accuracy, 60.00% sensitivity, and AUROC of 0.6800. A research platform comprising a GitHub Pages website and Research Studio was subsequently deployed. These findings substantiate the computational viability of the approach and demonstrate a reduction in sampled probability error, while confirming that the detection of micrometastases remains a critical priority.",
   "references": [
-    "Ashraf, M., Qui�ones Robles, W. R., Kim, M., Ko, Y. S., & Yi, M. Y. (2022). A loss-based patch label denoising method for improving whole-slide image analysis using a convolutional neural network. Scientific Reports, 12, Article 1392. https://doi.org/10.1038/s41598-022-05001-8",
+    "Abdel-Hamid, L., Yogarajah, P., & Tealab, S. H. A. (2025). Lightweight deep models based on domain adaptation and network pruning for breast cancer HER2 scoring: IHC vs. H&E histopathological images. PLOS ONE, 20(9), Article e0332362. https://doi.org/10.1371/journal.pone.0332362",
+    "Ashraf, M., Quiñones Robles, W. R., Kim, M., Ko, Y. S., & Yi, M. Y. (2022). A loss-based patch label denoising method for improving whole-slide image analysis using a convolutional neural network. Scientific Reports, 12, Article 1392. https://doi.org/10.1038/s41598-022-05001-8",
+    "Brussee, S., Buzzanca, G., Schrader, A. M. R., & Kers, J. (2025). Graph neural networks in histopathology: Emerging trends and future directions. Medical Image Analysis, 101, Article 103444. https://doi.org/10.1016/j.media.2024.103444",
+    "Budginaite, E., Magee, D. R., Kloft, M., Woodruff, H. C., & Grabsch, H. I. (2024). Computational methods for metastasis detection in lymph nodes and characterization of the metastasis-free lymph node microarchitecture: A systematic-narrative hybrid review. Journal of Pathology Informatics, 15, Article 100367. https://doi.org/10.1016/j.jpi.2024.100367",
     "Cossio, M., Wiedemann, N., Sanfeliu Torres, E., Barnadas Sole, E., & Igual, L. (2025). AI-augmented pathology: The experience of transfer learning and intra-domain data diversity in breast cancer metastasis detection. Frontiers in Oncology, 15, Article 1598289. https://doi.org/10.3389/fonc.2025.1598289",
     "Department of Health. (2023). 2023 Field Health Services Information System annual report. https://storage.googleapis.com/efoi-v2-prod/media/documents/FHSIS2023.pdf",
     "Duman, I., & Pichler, V. (2025). Modelling metastasis in a dish: In vitro approaches for studying breast cancer progression. Pathology and Oncology Research, 31, Article 1612179. https://doi.org/10.3389/pore.2025.1612179",
-    "Gao, Z., Mao, A., Dong, Y., Clayton, H., Wu, J., Liu, J., Wang, C., He, K., Gong, T., Li, C., & Crispin-Ortuzar, M. (2025). SMMILe enables accurate spatial quantification in digital pathology using multiple-instance learning. Nature Cancer, 6, 2025-2041. https://doi.org/10.1038/s43018-025-01060-8",
-    "Honma, N., Yoshida, M., Kinowak, K., Horii, R., Katsurada, Y., Murata, Y., Shimizu, A., Tanabe, Y., Yamauchi, C., Yamamoto, Y., Iwata, H., & Saji, S. (2024). The Japanese Breast Cancer Society clinical practice guidelines for pathological diagnosis of breast cancer, 2022 edition. Breast Cancer, 31, 8-15. https://doi.org/10.1007/s12282-023-01518-6",
+    "Gao, Z., Mao, A., Dong, Y., Clayton, H., Wu, J., Liu, J., Wang, C., He, K., Gong, T., Li, C., & Crispin-Ortuzar, M. (2025). SMMILe enables accurate spatial quantification in digital pathology using multiple-instance learning. Nature Cancer, 6, 2025–2041. https://doi.org/10.1038/s43018-025-01060-8",
+    "Honma, N., Yoshida, M., Kinowak, K., Horii, R., Katsurada, Y., Murata, Y., Shimizu, A., Tanabe, Y., Yamauchi, C., Yamamoto, Y., Iwata, H., & Saji, S. (2024). The Japanese Breast Cancer Society clinical practice guidelines for pathological diagnosis of breast cancer, 2022 edition. Breast Cancer, 31, 8–15. https://doi.org/10.1007/s12282-023-01518-6",
     "Kapoor, S., & Narayanan, A. (2023). Leakage and the reproducibility crisis in machine-learning-based science. Patterns, 4(9), Article 100804. https://doi.org/10.1016/j.patter.2023.100804",
-    "Komura, D., Ochi, M., & Ishikawa, S. (2025). Machine learning methods for histopathological image analysis: Updates in 2024. Computational and Structural Biotechnology Journal, 27, 383-400. https://doi.org/10.1016/j.csbj.2024.12.033",
+    "Khemani, B., Patil, S., Kotecha, K., & Tanwar, S. (2024). A review of graph neural networks: Concepts, architectures, techniques, challenges, datasets, applications, and future directions. Journal of Big Data, 11, Article 18. https://doi.org/10.1186/s40537-023-00876-4",
+    "Komura, D., Ochi, M., & Ishikawa, S. (2025). Machine learning methods for histopathological image analysis: Updates in 2024. Computational and Structural Biotechnology Journal, 27, 383–400. https://doi.org/10.1016/j.csbj.2024.12.033",
     "Kong, X., Liu, Q., Qu, Z., Wang, X., Zhang, W., Liu, Y., Coleman, R., Lin, C., & Wang, J. (2025). Mapping the metastatic landscape: A population-based cohort study for prognostic insights into newly diagnosed stage IV breast cancer cases. Cancer Innovation, 4(5), Article e70017. https://doi.org/10.1002/cai2.70017",
+    "Lu, M. Y., Williamson, D. F. K., Chen, T. Y., Chen, R. J., Barbieri, M., & Mahmood, F. (2021). Data-efficient and weakly supervised computational pathology on whole-slide images. Nature Biomedical Engineering, 5, 555–570. https://doi.org/10.1038/s41551-020-00682-w",
     "Mao, J., Xu, J., Tang, X., Liu, Y., Zhao, H., Tian, G., & Yang, J. (2025). CAMIL: Channel attention-based multiple instance learning for whole slide image classification. Bioinformatics, 41(2), Article btaf024. https://doi.org/10.1093/bioinformatics/btaf024",
-    "Mustafa, N., & Burkholz, R. (2024). GATE: How to keep out intrusive neighbors. In Proceedings of the 41st International Conference on Machine Learning (Vol. 235, pp. 36990-37015). Proceedings of Machine Learning Research. https://proceedings.mlr.press/v235/mustafa24a.html",
+    "Mehta, S., & Rastegari, M. (2022). MobileViT: Light-weight, general-purpose, and mobile-friendly vision transformer. International Conference on Learning Representations. https://arxiv.org/abs/2110.02178",
+    "Mienye, I. D., & Sun, Y. (2022). A survey of ensemble learning: Concepts, algorithms, applications, and prospects. IEEE Access, 10, 99129–99149. https://doi.org/10.1109/ACCESS.2022.3207287",
+    "Mustafa, N., & Burkholz, R. (2024). GATE: How to keep out intrusive neighbors. In Proceedings of the 41st International Conference on Machine Learning (Vol. 235, pp. 36990–37015). Proceedings of Machine Learning Research. https://proceedings.mlr.press/v235/mustafa24a.html",
     "Park, D., Lee, Y.-M., Eo, T., An, H. J., Kang, H., Park, E., Cha, Y. J., Park, H., Kwon, D., Kwon, S. Y., Jung, H.-R., Shin, S.-J., Park, H., Lee, Y., Park, S., Kim, J. M., Choi, S.-E., Cho, N. H., & Hwang, D. (2025). Multimodal AI model for preoperative prediction of axillary lymph node metastasis in breast cancer using whole slide images. npj Precision Oncology, 9, Article 131. https://doi.org/10.1038/s41698-025-00914-9",
     "Pocock, J., Graham, S., Vu, Q. D., Jahanifar, M., Deshpande, S., Hadjigeorghiou, G., Shephard, A., Bashir, R. M. S., Bilal, M., Lu, W., Epstein, D., Minhas, F., Rajpoot, N. M., & Raza, S. E. A. (2022). TIAToolbox as an end-to-end library for advanced tissue image analytics. Communications Medicine, 2, Article 120. https://doi.org/10.1038/s43856-022-00186-5",
-    "Reinke, A., Tizabi, M. D., Baumgartner, M., Eisenmann, M., Heckmann-N�tzel, D., Kavur, A. E., R�dsch, T., Sudre, C. H., Acion, L., Antonelli, M., Arbel, T., Bakas, S., Benis, A., Buettner, F., Cardoso, M. J., Cheplygina, V., Chen, J., Christodoulou, E., Cimini, B. A., . . . Maier-Hein, L. (2024). Understanding metric-related pitfalls in image analysis validation. Nature Methods, 21, 182-194. https://doi.org/10.1038/s41592-023-02150-0",
-    "Silva Filho, T., Song, H., Perello-Nieto, M., Santos-Rodriguez, R., Kull, M., & Flach, P. (2023). Classifier calibration: A survey on how to assess and improve predicted class probabilities. Machine Learning, 112, 3211-3260. https://doi.org/10.1007/s10994-023-06336-7",
+    "Reinke, A., Tizabi, M. D., Baumgartner, M., Eisenmann, M., Heckmann-Nötzel, D., Kavur, A. E., Rädsch, T., Sudre, C. H., Acion, L., Antonelli, M., Arbel, T., Bakas, S., Benis, A., Buettner, F., Cardoso, M. J., Cheplygina, V., Chen, J., Christodoulou, E., Cimini, B. A., . . . Maier-Hein, L. (2024). Understanding metric-related pitfalls in image analysis validation. Nature Methods, 21, 182–194. https://doi.org/10.1038/s41592-023-02150-0",
+    "Shahzad, T., Mazhar, T., Saqib, S. M., & Ouahada, K. (2025). Transformer-inspired training principles based breast cancer prediction: Combining EfficientNetB0 and ResNet50. Scientific Reports, 15, Article 13501. https://doi.org/10.1038/s41598-025-98523-w",
+    "Silva Filho, T., Song, H., Perello-Nieto, M., Santos-Rodriguez, R., Kull, M., & Flach, P. (2023). Classifier calibration: A survey on how to assess and improve predicted class probabilities. Machine Learning, 112, 3211–3260. https://doi.org/10.1007/s10994-023-06336-7",
     "Tauqeer, A., Asif, A., & Sadeghi-Naini, A. (2025). Detection, localization, and staging of breast cancer lymph node metastasis in digital pathology whole slide images using selective neighborhood attention-based deep learning. Scientific Reports, 15, Article 37847. https://doi.org/10.1038/s41598-025-21787-9",
-    "Tiangco, B., Daguit, S. E. J., Astrologo, N. C., Flores, L., Parma, R. N., & Celi, L. A. (2024). Challenges in the maintenance of an open hospital-based cancer registry system in a low-to-middle-income country (LMIC): 2017-2022 experience. PLOS Digital Health, 3(1), Article e0000328. https://doi.org/10.1371/journal.pdig.0000328",
+    "Tejani, A. S., Klontzas, M. E., Gatti, A. A., Mongan, J. T., Moy, L., Park, S. H., Kahn, C. E., Jr., & CLAIM 2024 Update Panel. (2024). Checklist for artificial intelligence in medical imaging (CLAIM): 2024 update. Radiology: Artificial Intelligence, 6(4), e240300. https://doi.org/10.1148/ryai.240300",
+    "Tiangco, B., Daguit, S. E. J., Astrologo, N. C., Flores, L., Parma, R. N., & Celi, L. A. (2024). Challenges in the maintenance of an open hospital-based cancer registry system in a low-to-middle-income country (LMIC): 2017–2022 experience. PLOS Digital Health, 3(1), Article e0000328. https://doi.org/10.1371/journal.pdig.0000328",
+    "World Health Organization. (2026, July 3). Breast cancer. https://www.who.int/news-room/fact-sheets/detail/breast-cancer",
     "Xu, H., Wang, M., Shi, D., Qin, H., Zhang, Y., Liu, Z., Madabhushi, A., Gao, P., Cong, F., & Lu, C. (2025). When multiple instance learning meets foundation models: Advancing histological whole slide image analysis. Medical Image Analysis, 101, Article 103456. https://doi.org/10.1016/j.media.2025.103456",
-    "Zhang, H., Meng, Y., Zhao, Y., Qiao, Y., Yang, X., Coupland, S. E., & Zheng, Y. (2022). DTFD-MIL: Double-tier feature distillation multiple instance learning for histopathology whole slide image classification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 18802-18812). https://openaccess.thecvf.com/content/CVPR2022/html/Zhang_DTFD-MIL_Double-Tier_Feature_Distillation_Multiple_Instance_Learning_for_Histopathology_Whole_CVPR_2022_paper.html",
-    "Zheng, T., Jiang, K., & Yao, H. (2024). Dynamic policy-driven adaptive multi-instance learning for whole slide image classification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 8028-8037). https://openaccess.thecvf.com/content/CVPR2024/html/Zheng_Dynamic_Policy-Driven_Adaptive_Multi-Instance_Learning_for_Whole_Slide_Image_Classification_CVPR_2024_paper.html"
+    "Zhang, H., Meng, Y., Zhao, Y., Qiao, Y., Yang, X., Coupland, S. E., & Zheng, Y. (2022). DTFD-MIL: Double-tier feature distillation multiple instance learning for histopathology whole slide image classification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 18802–18812). https://openaccess.thecvf.com/content/CVPR2022/html/Zhang_DTFD-MIL_Double-Tier_Feature_Distillation_Multiple_Instance_Learning_for_Histopathology_Whole_CVPR_2022_paper.html",
+    "Zheng, T., Jiang, K., & Yao, H. (2024). Dynamic policy-driven adaptive multi-instance learning for whole slide image classification. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (pp. 8028–8037). https://openaccess.thecvf.com/content/CVPR2024/html/Zheng_Dynamic_Policy-Driven_Adaptive_Multi-Instance_Learning_for_Whole_Slide_Image_Classification_CVPR_2024_paper.html"
   ],
   "tables": [
     {
       "number": 1,
-      "title": "Analytical roles of the three STEGASUS phases.",
+      "title": "Analytical Roles of STEGASUS Phases",
       "columns": [
         "Study phase",
         "Material or input",
@@ -50,16 +60,15 @@
         ],
         [
           "Phase III",
-          "Public research website and local WSI analysis workspace",
-          "Existing frozen inference pipeline; no application-driven model refitting.",
-          "Study presentation, upload and case-review implementation, and limited public-interface checks."
+          "Published GitHub Pages research website; linked Research Studio and private inference services",
+          "Frozen expert checkpoints; no model refitting in the application",
+          "Research presentation, workspace and analysis-job integration; limited interface verification"
         ]
-      ],
-      "note": ""
+      ]
     },
     {
       "number": 2,
-      "title": "Major computational risks and corresponding STEGASUS safeguards.",
+      "title": "Computational Risks and Safeguards",
       "columns": [
         "Potential problem",
         "Why it matters",
@@ -69,7 +78,7 @@
         [
           "Slide overlap and metadata mismatch",
           "Related patches or misaligned predictions can distort comparisons.",
-          "Preserve source-slide identity and patch-row correspondence; check partition IDs, coordinate validity and label alignment. Patient independence remains unverified."
+          "Preserve source-slide identity and patch-row correspondence; check partition IDs, coordinate validity and label alignment."
         ],
         [
           "Missing or uncertain reference labels",
@@ -84,7 +93,7 @@
         [
           "Patch-label distortion",
           "Cropping can alter the central region associated with the supplied label.",
-          "Retain the complete 96 x 96 patch; use flips for training and architecture-specific normalization without evaluation augmentation."
+          "Retain the complete 96 × 96 patch; use flips for training and architecture-specific normalization without evaluation augmentation."
         ],
         [
           "Unfair spatial or expert comparisons",
@@ -111,12 +120,11 @@
           "Results may not be reproducible or comparable across runs.",
           "Retain configurations, prediction files, IDs, thresholds and training histories; report matched graph-head seeds and distinguish their uncertainty from full-model retraining."
         ]
-      ],
-      "note": ""
+      ]
     },
     {
       "number": 3,
-      "title": "Principal components of the STEGASUS framework.",
+      "title": "STEGASUS Framework Components",
       "columns": [
         "Component",
         "Input",
@@ -125,17 +133,17 @@
       "rows": [
         [
           "EfficientNetB0",
-          "96 x 96 tissue patches",
+          "96 × 96 tissue patches",
           "Patch probabilities; frozen 1,280-dimensional features"
         ],
         [
           "MobileViT-XXS",
-          "96 x 96 tissue patches",
+          "96 × 96 tissue patches",
           "Patch probabilities"
         ],
         [
           "ResNet50",
-          "96 x 96 tissue patches",
+          "96 × 96 tissue patches",
           "Patch probabilities"
         ],
         [
@@ -148,12 +156,11 @@
           "Four aligned source-slide scores",
           "Calibrated ensemble score"
         ]
-      ],
-      "note": ""
+      ]
     },
     {
       "number": 4,
-      "title": "Composition of the sampled source-slide cohorts.",
+      "title": "Sampled Source-Slide Cohorts",
       "columns": [
         "Partition",
         "Negative",
@@ -183,1233 +190,255 @@
           "128",
           "Exploratory evaluation"
         ]
-      ],
-      "note": ""
+      ]
     },
     {
       "number": 5,
-      "title": "EfficientNetB0 compared with MobileViT-XXS.",
+      "title": "Classification Performance of STEGASUS and Its Individual Experts",
       "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "-0.0078",
-          "[-0.0703, 0.0469]",
-          "No"
-        ],
-        [
-          "Precision",
-          "-0.1034",
-          "[-0.2037, 0.0000]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "0.0833",
-          "[-0.0417, 0.2083]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "-0.0625",
-          "[-0.1250, 0.0000]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "0.0040",
-          "[-0.0815, 0.0980]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "-0.0217",
-          "[-0.0581, 0.0132]",
-          "No"
-        ],
-        [
-          "AP",
-          "-0.0604",
-          "[-0.1536, 0.0260]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "0.0848",
-          "[0.0353, 0.1340]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "1.0758",
-          "[0.1016, 2.2827]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 6,
-      "title": "EfficientNetB0 compared with ResNet50.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "-0.0234",
-          "[-0.0781, 0.0312]",
-          "No"
-        ],
-        [
-          "Precision",
-          "-0.1048",
-          "[-0.1828, -0.0233]",
-          "Yes"
-        ],
-        [
-          "Sensitivity",
-          "0.0417",
-          "[-0.0625, 0.1458]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "-0.0625",
-          "[-0.1125, -0.0125]",
-          "Yes"
-        ],
-        [
-          "F1-score",
-          "-0.0225",
-          "[-0.0965, 0.0564]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "-0.0260",
-          "[-0.0512, -0.0049]",
-          "Yes"
-        ],
-        [
-          "AP",
-          "-0.0666",
-          "[-0.1281, -0.0118]",
-          "Yes"
-        ],
-        [
-          "Brier score",
-          "0.0896",
-          "[0.0433, 0.1327]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "1.0654",
-          "[0.4810, 1.7937]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 7,
-      "title": "EfficientNetB0 compared with Spatial Graph.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "-0.0703",
-          "[-0.1250, -0.0234]",
-          "Yes"
-        ],
-        [
-          "Precision",
-          "-0.1304",
-          "[-0.2174, -0.0465]",
-          "Yes"
-        ],
-        [
-          "Sensitivity",
-          "-0.0625",
-          "[-0.1667, 0.0417]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "-0.0750",
-          "[-0.1375, -0.0250]",
-          "Yes"
-        ],
-        [
-          "F1-score",
-          "-0.0940",
-          "[-0.1686, -0.0242]",
-          "Yes"
-        ],
-        [
-          "AUROC",
-          "-0.0411",
-          "[-0.0733, -0.0154]",
-          "Yes"
-        ],
-        [
-          "AP",
-          "-0.1049",
-          "[-0.1815, -0.0360]",
-          "Yes"
-        ],
-        [
-          "Brier score",
-          "0.2477",
-          "[0.1783, 0.3188]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "1.5938",
-          "[0.7949, 2.6152]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 8,
-      "title": "MobileViT-XXS compared with ResNet50.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "-0.0156",
-          "[-0.0625, 0.0312]",
-          "No"
-        ],
-        [
-          "Precision",
-          "-0.0014",
-          "[-0.0736, 0.0750]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "-0.0417",
-          "[-0.1464, 0.0625]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "0.0000",
-          "[-0.0375, 0.0375]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "-0.0265",
-          "[-0.1033, 0.0495]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "-0.0043",
-          "[-0.0310, 0.0215]",
-          "No"
-        ],
-        [
-          "AP",
-          "-0.0062",
-          "[-0.0757, 0.0660]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "0.0048",
-          "[-0.0417, 0.0516]",
-          "No"
-        ],
-        [
-          "Log loss",
-          "-0.0104",
-          "[-0.9070, 0.7406]",
-          "No"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 9,
-      "title": "MobileViT-XXS compared with Spatial Graph.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "-0.0625",
-          "[-0.1172, -0.0156]",
-          "Yes"
-        ],
-        [
-          "Precision",
-          "-0.0270",
-          "[-0.0834, 0.0000]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "-0.1458",
-          "[-0.2708, -0.0208]",
-          "Yes"
-        ],
-        [
-          "Specificity",
-          "-0.0125",
-          "[-0.0375, 0.0000]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "-0.0980",
-          "[-0.1836, -0.0225]",
-          "Yes"
-        ],
-        [
-          "AUROC",
-          "-0.0194",
-          "[-0.0434, -0.0031]",
-          "Yes"
-        ],
-        [
-          "AP",
-          "-0.0445",
-          "[-0.1011, -0.0059]",
-          "Yes"
-        ],
-        [
-          "Brier score",
-          "0.1630",
-          "[0.0994, 0.2309]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "0.5180",
-          "[-0.0152, 1.2235]",
-          "No"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 10,
-      "title": "ResNet50 compared with Spatial Graph.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "-0.0469",
-          "[-0.0859, 0.0000]",
-          "No"
-        ],
-        [
-          "Precision",
-          "-0.0256",
-          "[-0.0834, 0.0000]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "-0.1042",
-          "[-0.2083, 0.0005]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "-0.0125",
-          "[-0.0375, 0.0000]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "-0.0715",
-          "[-0.1405, 0.0000]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "-0.0151",
-          "[-0.0363, -0.0013]",
-          "Yes"
-        ],
-        [
-          "AP",
-          "-0.0383",
-          "[-0.0964, -0.0029]",
-          "Yes"
-        ],
-        [
-          "Brier score",
-          "0.1582",
-          "[0.0910, 0.2287]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "0.5284",
-          "[-0.0119, 1.2725]",
-          "No"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 11,
-      "title": "Spatial-minus-self-only differences for seed 42.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "0.0078",
-          "[-0.0156, 0.0391]",
-          "No"
-        ],
-        [
-          "Precision",
-          "0.0227",
-          "[0.0000, 0.0698]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "0.0000",
-          "[-0.0625, 0.0625]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "0.0125",
-          "[0.0000, 0.0375]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "0.0103",
-          "[-0.0248, 0.0524]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "0.0039",
-          "[0.0000, 0.0107]",
-          "No"
-        ],
-        [
-          "AP",
-          "0.0060",
-          "[0.0000, 0.0163]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "0.0153",
-          "[0.0029, 0.0304]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "0.0951",
-          "[0.0187, 0.1884]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 12,
-      "title": "Spatial-minus-self-only differences for seed 123.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "0.0234",
-          "[0.0000, 0.0547]",
-          "No"
-        ],
-        [
-          "Precision",
-          "0.0233",
-          "[0.0000, 0.0732]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "0.0417",
-          "[0.0000, 0.1042]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "0.0125",
-          "[0.0000, 0.0375]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "0.0334",
-          "[0.0000, 0.0794]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "0.0039",
-          "[0.0000, 0.0112]",
-          "No"
-        ],
-        [
-          "AP",
-          "0.0060",
-          "[0.0000, 0.0170]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "0.0175",
-          "[0.0019, 0.0363]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "0.0853",
-          "[0.0052, 0.1822]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 13,
-      "title": "Spatial-minus-self-only differences for seed 2026.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "0.0000",
-          "[-0.0234, 0.0234]",
-          "No"
-        ],
-        [
-          "Precision",
-          "0.0227",
-          "[0.0000, 0.0698]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "-0.0208",
-          "[-0.0625, 0.0000]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "0.0125",
-          "[0.0000, 0.0375]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "-0.0014",
-          "[-0.0330, 0.0302]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "0.0034",
-          "[0.0000, 0.0109]",
-          "No"
-        ],
-        [
-          "AP",
-          "0.0057",
-          "[0.0000, 0.0185]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "0.0195",
-          "[0.0053, 0.0360]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "0.0915",
-          "[0.0309, 0.1658]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 14,
-      "title": "Development-selected operating thresholds.",
-      "columns": [
-        "Configuration",
-        "Threshold"
+        "Model",
+        "Acc. (%)",
+        "Sens. (%)",
+        "Spec. (%)",
+        "F1",
+        "AUROC"
       ],
       "rows": [
         [
           "EfficientNetB0",
-          "0.999512"
+          "89.06",
+          "83.33",
+          "92.50",
+          "0.8511",
+          "0.9581"
         ],
         [
           "MobileViT-XXS",
-          "1.000000"
+          "89.84",
+          "75.00",
+          "98.75",
+          "0.8471",
+          "0.9798"
         ],
         [
           "ResNet50",
-          "1.000000"
+          "91.41",
+          "79.17",
+          "98.75",
+          "0.8736",
+          "0.9841"
         ],
         [
           "Spatial Graph",
-          "0.004158"
+          "96.09",
+          "89.58",
+          "100.00",
+          "0.9451",
+          "0.9992"
         ],
         [
-          "Simple averaging",
-          "0.750917"
-        ],
-        [
-          "Calibrated ensemble",
-          "0.628536"
+          "STEGASUS ensemble",
+          "91.41",
+          "77.08",
+          "100.00",
+          "0.8706",
+          "0.9945"
         ]
-      ],
-      "note": "Note. The common development sensitivity target was 95%; test sensitivity was not constrained to this value."
+      ]
     },
     {
-      "number": 15,
-      "title": "Calibrated ensemble minus EfficientNetB0.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "F1-score",
-          "0.0195",
-          "[-0.0558, 0.0816]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "0.0365",
-          "[0.0137, 0.0632]",
-          "Yes"
-        ],
-        [
-          "AP",
-          "0.0969",
-          "[0.0345, 0.1651]",
-          "Yes"
-        ],
-        [
-          "Brier score",
-          "-0.3833",
-          "[-0.4314, -0.3311]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "-2.3445",
-          "[-3.3505, -1.5936]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 16,
-      "title": "Calibrated ensemble minus MobileViT-XXS.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "F1-score",
-          "0.0235",
-          "[-0.0385, 0.0885]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "0.0147",
-          "[-0.0010, 0.0352]",
-          "No"
-        ],
-        [
-          "AP",
-          "0.0366",
-          "[-0.0008, 0.0906]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "-0.2985",
-          "[-0.3442, -0.2525]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "-1.2688",
-          "[-1.9269, -0.8359]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 17,
-      "title": "Calibrated ensemble minus ResNet50.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "F1-score",
-          "-0.0030",
-          "[-0.0628, 0.0520]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "0.0104",
-          "[-0.0001, 0.0250]",
-          "No"
-        ],
-        [
-          "AP",
-          "0.0304",
-          "[0.0004, 0.0774]",
-          "Yes"
-        ],
-        [
-          "Brier score",
-          "-0.2938",
-          "[-0.3394, -0.2463]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "-1.2792",
-          "[-1.9798, -0.8590]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 18,
-      "title": "Calibrated ensemble minus Spatial Graph.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "F1-score",
-          "-0.0745",
-          "[-0.1417, -0.0237]",
-          "Yes"
-        ],
-        [
-          "AUROC",
-          "-0.0047",
-          "[-0.0138, 0.0008]",
-          "No"
-        ],
-        [
-          "AP",
-          "-0.0080",
-          "[-0.0232, 0.0010]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "-0.1356",
-          "[-0.1764, -0.0927]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "-0.7508",
-          "[-0.9735, -0.5194]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 19,
-      "title": "Calibrated ensemble minus Simple averaging.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "F1-score",
-          "-0.0260",
-          "[-0.0673, 0.0000]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "-0.0042",
-          "[-0.0128, 0.0003]",
-          "No"
-        ],
-        [
-          "AP",
-          "-0.0070",
-          "[-0.0211, 0.0004]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "-0.1624",
-          "[-0.1888, -0.1360]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "-0.3884",
-          "[-0.4432, -0.3322]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 20,
-      "title": "Complete ensemble minus without efficientnetb0.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "0.0234",
-          "[-0.0078, 0.0547]",
-          "No"
-        ],
-        [
-          "Precision",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "0.0625",
-          "[-0.0208, 0.1458]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "0.0413",
-          "[-0.0138, 0.1091]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "-0.0013",
-          "[-0.0065, 0.0029]",
-          "No"
-        ],
-        [
-          "AP",
-          "-0.0020",
-          "[-0.0108, 0.0050]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "-0.0040",
-          "[-0.0120, 0.0028]",
-          "No"
-        ],
-        [
-          "Log loss",
-          "-0.0115",
-          "[-0.0290, 0.0045]",
-          "No"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 21,
-      "title": "Complete ensemble minus without mobilevit-xxs.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "-0.0078",
-          "[-0.0391, 0.0234]",
-          "No"
-        ],
-        [
-          "Precision",
-          "0.0476",
-          "[0.0000, 0.1190]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "-0.0625",
-          "[-0.1255, 0.0000]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "0.0250",
-          "[0.0000, 0.0625]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "-0.0183",
-          "[-0.0724, 0.0270]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "0.0052",
-          "[-0.0016, 0.0138]",
-          "No"
-        ],
-        [
-          "AP",
-          "0.0101",
-          "[-0.0019, 0.0256]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "-0.0064",
-          "[-0.0161, 0.0025]",
-          "No"
-        ],
-        [
-          "Log loss",
-          "-0.0140",
-          "[-0.0361, 0.0063]",
-          "No"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 22,
-      "title": "Complete ensemble minus without resnet50.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "-0.0078",
-          "[-0.0234, 0.0000]",
-          "No"
-        ],
-        [
-          "Precision",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "-0.0208",
-          "[-0.0625, 0.0000]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "-0.0131",
-          "[-0.0413, 0.0000]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "0.0044",
-          "[-0.0008, 0.0128]",
-          "No"
-        ],
-        [
-          "AP",
-          "0.0059",
-          "[-0.0025, 0.0180]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "-0.0069",
-          "[-0.0146, 0.0007]",
-          "No"
-        ],
-        [
-          "Log loss",
-          "-0.0182",
-          "[-0.0364, -0.0008]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 23,
-      "title": "Complete ensemble minus without spatial graph.",
-      "columns": [
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
-      ],
-      "rows": [
-        [
-          "Accuracy",
-          "0.0078",
-          "[0.0000, 0.0234]",
-          "No"
-        ],
-        [
-          "Precision",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
-        ],
-        [
-          "Sensitivity",
-          "0.0208",
-          "[0.0000, 0.0625]",
-          "No"
-        ],
-        [
-          "Specificity",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
-        ],
-        [
-          "F1-score",
-          "0.0134",
-          "[0.0000, 0.0445]",
-          "No"
-        ],
-        [
-          "AUROC",
-          "0.0008",
-          "[-0.0000, 0.0029]",
-          "No"
-        ],
-        [
-          "AP",
-          "0.0014",
-          "[-0.0000, 0.0049]",
-          "No"
-        ],
-        [
-          "Brier score",
-          "0.0049",
-          "[0.0011, 0.0085]",
-          "Yes"
-        ],
-        [
-          "Log loss",
-          "0.0119",
-          "[0.0021, 0.0205]",
-          "Yes"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 24,
-      "title": "Whole-slide processing and evaluation results.",
-      "columns": [
-        "Measure",
-        "Result"
-      ],
-      "rows": [
-        [
-          "Processed images",
-          "20/20 (100%)"
-        ],
-        [
-          "TN / FP / FN / TP",
-          "10 / 0 / 4 / 6"
-        ],
-        [
-          "Accuracy / sensitivity / specificity",
-          "80.00% / 60.00% / 100.00%"
-        ],
-        [
-          "AUROC / AP",
-          "0.7200 / 0.8190"
-        ],
-        [
-          "Processing time and resource use",
-          "Not systematically recorded"
-        ],
-        [
-          "Heatmaps and reproducibility records",
-          "Available for all 20 slides"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 25,
-      "title": "Primary-seed classification performance on the shared 128 source-slide groups.",
+      "number": 6,
+      "title": "Probability Quality and Confusion Counts of the Principal Models",
       "columns": [
         "Model",
-        "Accuracy",
-        "Precision",
-        "Sensitivity",
-        "Specificity",
-        "F1"
-      ],
-      "rows": [
-        [
-          "STEGASUS",
-          "0.9141",
-          "1.0000",
-          "0.7708",
-          "1.0000",
-          "0.8706"
-        ],
-        [
-          "Spatial Graph",
-          "0.9609",
-          "1.0000",
-          "0.8958",
-          "1.0000",
-          "0.9451"
-        ],
-        [
-          "CLAM",
-          "0.9297",
-          "0.8980",
-          "0.9167",
-          "0.9375",
-          "0.9072"
-        ],
-        [
-          "DTFD-MIL",
-          "0.9531",
-          "1.0000",
-          "0.8750",
-          "1.0000",
-          "0.9333"
-        ],
-        [
-          "CAMIL",
-          "0.8750",
-          "1.0000",
-          "0.6667",
-          "1.0000",
-          "0.8000"
-        ]
-      ],
-      "note": "Note. Values are proportions. Seeds for the adapted comparators: 42. Original baseline scores were loaded from saved predictions."
-    },
-    {
-      "number": 26,
-      "title": "Primary-seed discrimination and probability prediction error.",
-      "columns": [
-        "Model",
-        "AUROC",
         "AP",
         "Brier score",
+        "Log loss",
+        "TN / FP / FN / TP"
+      ],
+      "rows": [
+        [
+          "EfficientNetB0",
+          "0.8939",
+          "0.4398",
+          "2.5518",
+          "74 / 6 / 8 / 40"
+        ],
+        [
+          "MobileViT-XXS",
+          "0.9542",
+          "0.3550",
+          "1.4760",
+          "79 / 1 / 12 / 36"
+        ],
+        [
+          "ResNet50",
+          "0.9604",
+          "0.3503",
+          "1.4864",
+          "79 / 1 / 10 / 38"
+        ],
+        [
+          "Spatial Graph",
+          "0.9988",
+          "0.1921",
+          "0.9580",
+          "80 / 0 / 5 / 43"
+        ],
+        [
+          "STEGASUS ensemble",
+          "0.9908",
+          "0.0565",
+          "0.2072",
+          "80 / 0 / 11 / 37"
+        ]
+      ]
+    },
+    {
+      "number": 7,
+      "title": "Spatial and Self-Only Graph Performance Across Three Matched Seeds",
+      "columns": [
+        "Graph condition",
+        "Acc. (%)",
+        "AUROC",
+        "AP",
+        "Brier",
         "Log loss"
       ],
       "rows": [
         [
-          "STEGASUS",
+          "Spatial adjacency",
+          "96.09",
+          "0.99948",
+          "0.99917",
+          "0.1886",
+          "0.8754"
+        ],
+        [
+          "Self-only adjacency",
+          "95.05",
+          "0.99575",
+          "0.99324",
+          "0.1712",
+          "0.7848"
+        ]
+      ]
+    },
+    {
+      "number": 8,
+      "title": "Classification Performance of Leave-One-Expert-Out Ensemble Variants",
+      "columns": [
+        "Configuration",
+        "Acc. (%)",
+        "Sens. (%)",
+        "Spec. (%)",
+        "F1",
+        "Brier"
+      ],
+      "rows": [
+        [
+          "Complete ensemble",
+          "91.41",
+          "77.08",
+          "100.00",
+          "0.8706",
+          "0.0565"
+        ],
+        [
+          "Without EfficientNetB0",
+          "89.06",
+          "70.83",
+          "100.00",
+          "0.8293",
+          "0.0605"
+        ],
+        [
+          "Without MobileViT-XXS",
+          "92.19",
+          "83.33",
+          "97.50",
+          "0.8889",
+          "0.0629"
+        ],
+        [
+          "Without ResNet50",
+          "92.19",
+          "79.17",
+          "100.00",
+          "0.8837",
+          "0.0634"
+        ],
+        [
+          "Without Spatial Graph",
+          "90.62",
+          "75.00",
+          "100.00",
+          "0.8571",
+          "0.0516"
+        ]
+      ]
+    },
+    {
+      "number": 9,
+      "title": "Primary-Seed Classification Comparison With Adapted MIL Methods",
+      "columns": [
+        "Configuration",
+        "Acc. (%)",
+        "Sens. (%)",
+        "Spec. (%)",
+        "F1"
+      ],
+      "rows": [
+        [
+          "STEGASUS ensemble",
+          "91.41",
+          "77.08",
+          "100.00",
+          "0.8706"
+        ],
+        [
+          "Spatial Graph",
+          "96.09",
+          "89.58",
+          "100.00",
+          "0.9451"
+        ],
+        [
+          "CLAM",
+          "92.97",
+          "91.67",
+          "93.75",
+          "0.9072"
+        ],
+        [
+          "DTFD-MIL",
+          "95.31",
+          "87.50",
+          "100.00",
+          "0.9333"
+        ],
+        [
+          "CAMIL",
+          "87.50",
+          "66.67",
+          "100.00",
+          "0.8000"
+        ]
+      ]
+    },
+    {
+      "number": 10,
+      "title": "Primary-Seed Ranking and Probability Quality of the Compared Models",
+      "columns": [
+        "Configuration",
+        "AUROC",
+        "AP",
+        "Brier",
+        "Log loss"
+      ],
+      "rows": [
+        [
+          "STEGASUS ensemble",
           "0.9945",
           "0.9908",
           "0.0565",
@@ -1443,1314 +472,271 @@
           "0.1009",
           "0.3031"
         ]
-      ],
-      "note": "Note. Lower Brier score and log loss indicate less probability error; larger AUROC and AP indicate stronger ranking."
+      ]
     },
     {
-      "number": 27,
-      "title": "Frozen operating thresholds and confusion counts.",
+      "number": 11,
+      "title": "Frozen STEGASUS Results on 20 Selected CAMELYON16 Whole-Slide Images",
       "columns": [
-        "Model",
-        "Threshold",
-        "TN",
-        "FP",
-        "FN",
-        "TP"
+        "Measure",
+        "Observed result"
       ],
       "rows": [
         [
-          "STEGASUS",
-          "0.6285",
-          "80",
-          "0",
-          "11",
-          "37"
+          "Completed WSI processing",
+          "20/20 slides (100.00%)"
         ],
         [
-          "Spatial Graph",
-          "0.0042",
-          "80",
-          "0",
-          "5",
-          "43"
+          "Reference cohort",
+          "10 positive; 10 negative"
         ],
         [
-          "CLAM",
-          "0.2111",
-          "75",
-          "5",
-          "4",
-          "44"
+          "Confusion counts (TN / FP / FN / TP)",
+          "10 / 0 / 4 / 6"
         ],
         [
-          "DTFD-MIL",
-          "0.1899",
-          "80",
-          "0",
-          "6",
-          "42"
+          "Accuracy / Sensitivity / Specificity",
+          "80.00% / 60.00% / 100.00%"
         ],
         [
-          "CAMIL",
-          "0.3152",
-          "80",
-          "0",
-          "16",
-          "32"
+          "Precision / F1-score",
+          "100.00% / 0.7500"
+        ],
+        [
+          "AUROC / AP",
+          "0.7200 / 0.8190"
+        ],
+        [
+          "Brier score / Log loss",
+          "0.1808 / 0.5278"
+        ],
+        [
+          "Grid locations / Retained tissue patches",
+          "2,165,138 / 298,164"
+        ],
+        [
+          "End-to-end timing",
+          "Not systematically recorded"
         ]
-      ],
-      "note": ""
+      ]
     },
     {
-      "number": 28,
-      "title": "Paired differences between STEGASUS and each primary comparator.",
+      "number": 12,
+      "title": "Frozen STEGASUS Results on Ten SLN-Breast Whole-Slide Images",
       "columns": [
-        "Comparator",
-        "Metric",
-        "Difference",
-        "95% CI",
-        "Excludes zero"
+        "Measure",
+        "Observed result"
       ],
       "rows": [
         [
-          "Spatial Graph",
-          "Accuracy",
-          "-0.0469",
-          "[-0.0859, -0.0156]",
-          "Yes"
+          "Analyzed cohort",
+          "10 slides (5 positive; 5 negative)"
         ],
         [
-          "Spatial Graph",
-          "Precision",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
+          "Saved prediction outputs",
+          "10 slides"
         ],
         [
-          "Spatial Graph",
-          "Sensitivity",
-          "-0.1250",
-          "[-0.2292, -0.0417]",
-          "Yes"
+          "Output availability",
+          "All 10 analyzed slides"
         ],
         [
-          "Spatial Graph",
-          "Specificity",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
+          "Confusion counts (TN / FP / FN / TP)",
+          "5 / 0 / 2 / 3"
         ],
         [
-          "Spatial Graph",
-          "F1",
-          "-0.0745",
-          "[-0.1399, -0.0237]",
-          "Yes"
+          "Accuracy / Sensitivity / Specificity",
+          "80.00% / 60.00% / 100.00%"
         ],
         [
-          "Spatial Graph",
+          "Precision / F1-score",
+          "100.00% / 0.7500"
+        ],
+        [
+          "AUROC / AP",
+          "0.6800 / 0.8111"
+        ],
+        [
+          "Brier score / Log loss",
+          "0.2286 / 0.6282"
+        ],
+        [
+          "Grid locations / Retained tissue patches",
+          "404,179 / 99,117"
+        ],
+        [
+          "Frozen operating threshold",
+          "0.628536"
+        ]
+      ]
+    },
+    {
+      "number": 13,
+      "title": "Comparison of Recorded STEGASUS Evaluation Settings",
+      "columns": [
+        "Measure",
+        "PCam sampled groups",
+        "CAMELYON16 WSIs",
+        "SLN-Breast WSIs"
+      ],
+      "rows": [
+        [
+          "Evaluated cases",
+          "128",
+          "20",
+          "10"
+        ],
+        [
+          "Positive / Negative",
+          "48 / 80",
+          "10 / 10",
+          "5 / 5"
+        ],
+        [
+          "Accuracy (%)",
+          "91.41",
+          "80.00",
+          "80.00"
+        ],
+        [
+          "Sensitivity (%)",
+          "77.08",
+          "60.00",
+          "60.00"
+        ],
+        [
+          "Specificity (%)",
+          "100.00",
+          "100.00",
+          "100.00"
+        ],
+        [
+          "F1-score",
+          "0.8706",
+          "0.7500",
+          "0.7500"
+        ],
+        [
           "AUROC",
-          "-0.0047",
-          "[-0.0135, 0.0010]",
-          "No"
+          "0.9945",
+          "0.7200",
+          "0.6800"
         ],
         [
-          "Spatial Graph",
           "AP",
-          "-0.0080",
-          "[-0.0222, 0.0016]",
-          "No"
+          "0.9908",
+          "0.8190",
+          "0.8111"
         ],
         [
-          "Spatial Graph",
           "Brier score",
-          "-0.1356",
-          "[-0.1785, -0.0935]",
-          "Yes"
+          "0.0565",
+          "0.1808",
+          "0.2286"
         ],
         [
-          "Spatial Graph",
           "Log loss",
-          "-0.7508",
-          "[-0.9855, -0.5180]",
-          "Yes"
-        ],
-        [
-          "CLAM",
-          "Accuracy",
-          "-0.0156",
-          "[-0.0625, 0.0312]",
-          "No"
-        ],
-        [
-          "CLAM",
-          "Precision",
-          "0.1020",
-          "[0.0222, 0.1800]",
-          "Yes"
-        ],
-        [
-          "CLAM",
-          "Sensitivity",
-          "-0.1458",
-          "[-0.2500, -0.0625]",
-          "Yes"
-        ],
-        [
-          "CLAM",
-          "Specificity",
-          "0.0625",
-          "[0.0125, 0.1250]",
-          "Yes"
-        ],
-        [
-          "CLAM",
-          "F1",
-          "-0.0366",
-          "[-0.1158, 0.0308]",
-          "No"
-        ],
-        [
-          "CLAM",
-          "AUROC",
-          "0.0081",
-          "[-0.0023, 0.0227]",
-          "No"
-        ],
-        [
-          "CLAM",
-          "AP",
-          "0.0106",
-          "[-0.0045, 0.0300]",
-          "No"
-        ],
-        [
-          "CLAM",
-          "Brier score",
-          "-0.0743",
-          "[-0.0977, -0.0515]",
-          "Yes"
-        ],
-        [
-          "CLAM",
-          "Log loss",
-          "-0.1933",
-          "[-0.2486, -0.1391]",
-          "Yes"
-        ],
-        [
-          "DTFD-MIL",
-          "Accuracy",
-          "-0.0391",
-          "[-0.0703, -0.0078]",
-          "Yes"
-        ],
-        [
-          "DTFD-MIL",
-          "Precision",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
-        ],
-        [
-          "DTFD-MIL",
-          "Sensitivity",
-          "-0.1042",
-          "[-0.1875, -0.0208]",
-          "Yes"
-        ],
-        [
-          "DTFD-MIL",
-          "Specificity",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
-        ],
-        [
-          "DTFD-MIL",
-          "F1",
-          "-0.0627",
-          "[-0.1243, -0.0128]",
-          "Yes"
-        ],
-        [
-          "DTFD-MIL",
-          "AUROC",
-          "-0.0031",
-          "[-0.0115, 0.0036]",
-          "No"
-        ],
-        [
-          "DTFD-MIL",
-          "AP",
-          "-0.0056",
-          "[-0.0189, 0.0050]",
-          "No"
-        ],
-        [
-          "DTFD-MIL",
-          "Brier score",
-          "-0.0614",
-          "[-0.0842, -0.0393]",
-          "Yes"
-        ],
-        [
-          "DTFD-MIL",
-          "Log loss",
-          "-0.1529",
-          "[-0.2083, -0.0992]",
-          "Yes"
-        ],
-        [
-          "CAMIL",
-          "Accuracy",
-          "0.0391",
-          "[-0.0078, 0.0859]",
-          "No"
-        ],
-        [
-          "CAMIL",
-          "Precision",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
-        ],
-        [
-          "CAMIL",
-          "Sensitivity",
-          "0.1042",
-          "[-0.0208, 0.2292]",
-          "No"
-        ],
-        [
-          "CAMIL",
-          "Specificity",
-          "0.0000",
-          "[0.0000, 0.0000]",
-          "No"
-        ],
-        [
-          "CAMIL",
-          "F1",
-          "0.0706",
-          "[-0.0128, 0.1597]",
-          "No"
-        ],
-        [
-          "CAMIL",
-          "AUROC",
-          "-0.0049",
-          "[-0.0138, 0.0005]",
-          "No"
-        ],
-        [
-          "CAMIL",
-          "AP",
-          "-0.0083",
-          "[-0.0225, 0.0008]",
-          "No"
-        ],
-        [
-          "CAMIL",
-          "Brier score",
-          "-0.0444",
-          "[-0.0726, -0.0176]",
-          "Yes"
-        ],
-        [
-          "CAMIL",
-          "Log loss",
-          "-0.0959",
-          "[-0.1749, -0.0231]",
-          "Yes"
+          "0.2072",
+          "0.5278",
+          "0.6282"
         ]
-      ],
-      "note": "Note. Differences equal STEGASUS minus comparator; 5,000 paired class-stratified source-slide bootstrap replicates. Negative probability-error differences favor STEGASUS. Intervals are conditional on the fitted models and previously inspected evaluation cases."
+      ]
     },
     {
-      "number": 29,
-      "title": "Primary AP score-swap tests with Holm adjustment.",
+      "number": 14,
+      "title": "Recorded Computational Cost of Adapted MIL Aggregation Heads (Seed 42)",
       "columns": [
-        "Comparator",
-        "Raw p",
-        "Holm-adjusted p"
+        "Adapted head",
+        "Training (s)",
+        "Inference (s)",
+        "Peak GPU (MiB)"
       ],
       "rows": [
         [
           "CLAM",
-          "0.5715",
-          "1.0000"
-        ],
-        [
-          "DTFD-MIL",
-          "0.6545",
-          "1.0000"
-        ],
-        [
-          "CAMIL",
-          "0.5579",
-          "1.0000"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 30,
-      "title": "Individual comparator seeds and classification performance.",
-      "columns": [
-        "Model",
-        "Seed",
-        "Accuracy",
-        "Sensitivity",
-        "Specificity",
-        "F1"
-      ],
-      "rows": [
-        [
-          "CLAM",
-          "42",
-          "0.9297",
-          "0.9167",
-          "0.9375",
-          "0.9072"
-        ],
-        [
-          "CLAM",
-          "123",
-          "0.9531",
-          "0.8958",
-          "0.9875",
-          "0.9348"
-        ],
-        [
-          "CLAM",
-          "2026",
-          "0.9531",
-          "0.8958",
-          "0.9875",
-          "0.9348"
-        ],
-        [
-          "DTFD-MIL",
-          "42",
-          "0.9531",
-          "0.8750",
-          "1.0000",
-          "0.9333"
-        ],
-        [
-          "DTFD-MIL",
-          "123",
-          "0.9453",
-          "0.8750",
-          "0.9875",
-          "0.9231"
-        ],
-        [
-          "DTFD-MIL",
-          "2026",
-          "0.9531",
-          "0.8958",
-          "0.9875",
-          "0.9348"
-        ],
-        [
-          "CAMIL",
-          "42",
-          "0.8750",
-          "0.6667",
-          "1.0000",
-          "0.8000"
-        ],
-        [
-          "CAMIL",
-          "123",
-          "0.8438",
-          "0.6458",
-          "0.9625",
-          "0.7561"
-        ],
-        [
-          "CAMIL",
-          "2026",
-          "0.8828",
-          "0.6875",
-          "1.0000",
-          "0.8148"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 31,
-      "title": "Individual comparator seeds and score quality.",
-      "columns": [
-        "Model",
-        "Seed",
-        "AUROC",
-        "AP",
-        "Brier",
-        "Log loss"
-      ],
-      "rows": [
-        [
-          "CLAM",
-          "42",
-          "0.9865",
-          "0.9802",
-          "0.1308",
-          "0.4005"
-        ],
-        [
-          "CLAM",
-          "123",
-          "0.9938",
-          "0.9894",
-          "0.0731",
-          "0.2332"
-        ],
-        [
-          "CLAM",
-          "2026",
-          "0.9935",
-          "0.9887",
-          "0.0630",
-          "0.2032"
-        ],
-        [
-          "DTFD-MIL",
-          "42",
-          "0.9977",
-          "0.9964",
-          "0.1179",
-          "0.3601"
-        ],
-        [
-          "DTFD-MIL",
-          "123",
-          "0.9974",
-          "0.9957",
-          "0.0819",
-          "0.2582"
-        ],
-        [
-          "DTFD-MIL",
-          "2026",
-          "0.9969",
-          "0.9947",
-          "0.0795",
-          "0.2503"
-        ],
-        [
-          "CAMIL",
-          "42",
-          "0.9995",
-          "0.9991",
-          "0.1009",
-          "0.3031"
-        ],
-        [
-          "CAMIL",
-          "123",
-          "0.6862",
-          "0.7761",
-          "0.1479",
-          "0.4847"
-        ],
-        [
-          "CAMIL",
-          "2026",
-          "0.9125",
-          "0.9162",
-          "0.1398",
-          "0.4256"
-        ]
-      ],
-      "note": ""
-    },
-    {
-      "number": 32,
-      "title": "Training variation across three comparator seeds.",
-      "columns": [
-        "Model",
-        "F1 mean � SD",
-        "AUROC mean � SD",
-        "AP mean � SD"
-      ],
-      "rows": [
-        [
-          "CAMIL",
-          "0.7903 � 0.0305",
-          "0.8661 � 0.1617",
-          "0.8971 � 0.1127"
-        ],
-        [
-          "CLAM",
-          "0.9256 � 0.0159",
-          "0.9912 � 0.0041",
-          "0.9861 � 0.0051"
-        ],
-        [
-          "DTFD-MIL",
-          "0.9304 � 0.0064",
-          "0.9973 � 0.0004",
-          "0.9956 � 0.0008"
-        ]
-      ],
-      "note": "Note. Sample SD across seeds 42, 123, and 2026; these are not population confidence intervals."
-    },
-    {
-      "number": 33,
-      "title": "Lesion-size subgroup sensitivity in the internal sampled positive groups.",
-      "columns": [
-        "Model",
-        "Lesion class",
-        "Detected / total",
-        "Sensitivity",
-        "Wilson 95% CI"
-      ],
-      "rows": [
-        [
-          "STEGASUS",
-          "micro",
-          "17 / 27",
-          "0.6296",
-          "[0.4423, 0.7847]"
-        ],
-        [
-          "STEGASUS",
-          "macro",
-          "20 / 21",
-          "0.9524",
-          "[0.7733, 0.9915]"
-        ],
-        [
-          "Spatial Graph",
-          "micro",
-          "23 / 27",
-          "0.8519",
-          "[0.6752, 0.9408]"
-        ],
-        [
-          "Spatial Graph",
-          "macro",
-          "20 / 21",
-          "0.9524",
-          "[0.7733, 0.9915]"
-        ],
-        [
-          "CLAM",
-          "micro",
-          "23 / 27",
-          "0.8519",
-          "[0.6752, 0.9408]"
-        ],
-        [
-          "CLAM",
-          "macro",
-          "21 / 21",
-          "1.0000",
-          "[0.8454, 1.0000]"
-        ],
-        [
-          "DTFD-MIL",
-          "micro",
-          "22 / 27",
-          "0.8148",
-          "[0.6330, 0.9182]"
-        ],
-        [
-          "DTFD-MIL",
-          "macro",
-          "20 / 21",
-          "0.9524",
-          "[0.7733, 0.9915]"
-        ],
-        [
-          "CAMIL",
-          "micro",
-          "16 / 27",
-          "0.5926",
-          "[0.4073, 0.7549]"
-        ],
-        [
-          "CAMIL",
-          "macro",
-          "16 / 21",
-          "0.7619",
-          "[0.5491, 0.8937]"
-        ]
-      ],
-      "note": "Note. Internal source-slide groups, not the separate 20-slide WSI cohort."
-    },
-    {
-      "number": 34,
-      "title": "Recorded MIL-head efficiency on cached features.",
-      "columns": [
-        "Model",
-        "Seed",
-        "Parameters",
-        "Training s",
-        "Inference s",
-        "Peak GPU MiB"
-      ],
-      "rows": [
-        [
-          "CLAM",
-          "42",
-          "921,863",
           "89.07",
           "0.2616",
           "39.69"
         ],
         [
-          "CLAM",
-          "123",
-          "921,863",
-          "16.01",
-          "0.3005",
-          "97.60"
-        ],
-        [
-          "CLAM",
-          "2026",
-          "921,863",
-          "15.25",
-          "0.3350",
-          "109.27"
-        ],
-        [
           "DTFD-MIL",
-          "42",
-          "920,326",
           "17.66",
           "0.3816",
           "93.01"
         ],
         [
-          "DTFD-MIL",
-          "123",
-          "920,326",
-          "15.93",
-          "0.4278",
-          "92.81"
-        ],
-        [
-          "DTFD-MIL",
-          "2026",
-          "920,326",
-          "25.92",
-          "0.3391",
-          "92.64"
-        ],
-        [
           "CAMIL",
-          "42",
-          "9,401,635",
           "232.69",
           "8.7272",
           "1340.66"
-        ],
-        [
-          "CAMIL",
-          "123",
-          "9,401,635",
-          "142.83",
-          "2.4450",
-          "1456.61"
-        ],
-        [
-          "CAMIL",
-          "2026",
-          "9,401,635",
-          "116.69",
-          "2.4331",
-          "1529.01"
         ]
-      ],
-      "note": "Note. All listed runs used CUDA. Times exclude encoder extraction. Peak allocated GPU memory describes the execution session; training durations are not standardized comparisons of complete systems."
-    },
-    {
-      "number": 35,
-      "title": "WILDS hospital-2 patch classification at threshold 0.5.",
-      "columns": [
-        "Patch expert",
-        "Accuracy",
-        "Precision",
-        "Sensitivity",
-        "Specificity",
-        "F1"
-      ],
-      "rows": [
-        [
-          "EfficientNetB0",
-          "0.9602",
-          "0.9812",
-          "0.9383",
-          "0.9820",
-          "0.9593"
-        ],
-        [
-          "MobileViT-XXS",
-          "0.9557",
-          "0.9873",
-          "0.9232",
-          "0.9881",
-          "0.9542"
-        ],
-        [
-          "ResNet50",
-          "0.8825",
-          "0.9911",
-          "0.7719",
-          "0.9931",
-          "0.8679"
-        ]
-      ],
-      "note": "Note. 85,054 correlated patches, 10 slides, nine patients. These are individual expert results."
-    },
-    {
-      "number": 36,
-      "title": "WILDS patch discrimination and probability error.",
-      "columns": [
-        "Patch expert",
-        "AUROC",
-        "AP",
-        "Brier score"
-      ],
-      "rows": [
-        [
-          "EfficientNetB0",
-          "0.9909",
-          "0.9912",
-          "0.0326"
-        ],
-        [
-          "MobileViT-XXS",
-          "0.9927",
-          "0.9930",
-          "0.0343"
-        ],
-        [
-          "ResNet50",
-          "0.9880",
-          "0.9883",
-          "0.0894"
-        ]
-      ],
-      "note": "Note. Log loss was not populated in the saved external metric table and is not reported. No patch-independence confidence interval is implied."
-    },
-    {
-      "number": 37,
-      "title": "Descriptive scores on the 10 WILDS sampled bags.",
-      "columns": [
-        "Slide",
-        "STEGASUS",
-        "Graph",
-        "CLAM",
-        "DTFD-MIL",
-        "CAMIL"
-      ],
-      "rows": [
-        [
-          "040 / 2",
-          "0.4025",
-          "0.9962",
-          "1.0000",
-          "1.0000",
-          "1.0000"
-        ],
-        [
-          "041 / 0",
-          "0.3004",
-          "0.0026",
-          "0.1886",
-          "0.1433",
-          "0.3628"
-        ],
-        [
-          "042 / 3",
-          "0.9006",
-          "1.0000",
-          "1.0000",
-          "1.0000",
-          "1.0000"
-        ],
-        [
-          "044 / 4",
-          "0.9300",
-          "1.0000",
-          "1.0000",
-          "1.0000",
-          "1.0000"
-        ],
-        [
-          "045 / 1",
-          "0.3888",
-          "0.0025",
-          "0.1867",
-          "0.1379",
-          "0.8033"
-        ],
-        [
-          "046 / 3",
-          "0.9120",
-          "1.0000",
-          "1.0000",
-          "1.0000",
-          "1.0000"
-        ],
-        [
-          "046 / 4",
-          "0.6075",
-          "1.0000",
-          "1.0000",
-          "1.0000",
-          "1.0000"
-        ],
-        [
-          "048 / 1",
-          "0.9113",
-          "1.0000",
-          "1.0000",
-          "1.0000",
-          "1.0000"
-        ],
-        [
-          "051 / 2",
-          "0.9300",
-          "1.0000",
-          "1.0000",
-          "1.0000",
-          "1.0000"
-        ],
-        [
-          "052 / 1",
-          "0.9222",
-          "1.0000",
-          "1.0000",
-          "1.0000",
-          "1.0000"
-        ]
-      ],
-      "note": "Note. Slide identifiers show patient / node. Every bag has patch-derived reference label 1; all slides overlap the supplied prior inventory. Probabilities are not validated full-slide patient-risk estimates."
-    },
-    {
-      "number": "A1",
-      "title": "Individual source-slide bootstrap intervals for the supplementary primary comparison.",
-      "columns": [
-        "Model",
-        "Metric",
-        "Estimate",
-        "95% CI"
-      ],
-      "rows": [
-        [
-          "STEGASUS",
-          "Accuracy",
-          "0.9141",
-          "[0.8672, 0.9531]"
-        ],
-        [
-          "STEGASUS",
-          "Precision",
-          "1.0000",
-          "[1.0000, 1.0000]"
-        ],
-        [
-          "STEGASUS",
-          "Sensitivity",
-          "0.7708",
-          "[0.6458, 0.8750]"
-        ],
-        [
-          "STEGASUS",
-          "Specificity",
-          "1.0000",
-          "[1.0000, 1.0000]"
-        ],
-        [
-          "STEGASUS",
-          "F1",
-          "0.8706",
-          "[0.7848, 0.9333]"
-        ],
-        [
-          "STEGASUS",
-          "AUROC",
-          "0.9945",
-          "[0.9857, 0.9997]"
-        ],
-        [
-          "STEGASUS",
-          "AP",
-          "0.9908",
-          "[0.9765, 0.9996]"
-        ],
-        [
-          "STEGASUS",
-          "Brier score",
-          "0.0565",
-          "[0.0371, 0.0785]"
-        ],
-        [
-          "STEGASUS",
-          "Log loss",
-          "0.2072",
-          "[0.1604, 0.2601]"
-        ],
-        [
-          "Spatial Graph",
-          "Accuracy",
-          "0.9609",
-          "[0.9297, 0.9922]"
-        ],
-        [
-          "Spatial Graph",
-          "Precision",
-          "1.0000",
-          "[1.0000, 1.0000]"
-        ],
-        [
-          "Spatial Graph",
-          "Sensitivity",
-          "0.8958",
-          "[0.8125, 0.9792]"
-        ],
-        [
-          "Spatial Graph",
-          "Specificity",
-          "1.0000",
-          "[1.0000, 1.0000]"
-        ],
-        [
-          "Spatial Graph",
-          "F1",
-          "0.9451",
-          "[0.8966, 0.9895]"
-        ],
-        [
-          "Spatial Graph",
-          "AUROC",
-          "0.9992",
-          "[0.9964, 1.0000]"
-        ],
-        [
-          "Spatial Graph",
-          "AP",
-          "0.9988",
-          "[0.9947, 1.0000]"
-        ],
-        [
-          "Spatial Graph",
-          "Brier score",
-          "0.1921",
-          "[0.1400, 0.2445]"
-        ],
-        [
-          "Spatial Graph",
-          "Log loss",
-          "0.9580",
-          "[0.6937, 1.2234]"
-        ],
-        [
-          "CLAM",
-          "Accuracy",
-          "0.9297",
-          "[0.8828, 0.9688]"
-        ],
-        [
-          "CLAM",
-          "Precision",
-          "0.8980",
-          "[0.8200, 0.9778]"
-        ],
-        [
-          "CLAM",
-          "Sensitivity",
-          "0.9167",
-          "[0.8333, 0.9792]"
-        ],
-        [
-          "CLAM",
-          "Specificity",
-          "0.9375",
-          "[0.8750, 0.9875]"
-        ],
-        [
-          "CLAM",
-          "F1",
-          "0.9072",
-          "[0.8454, 0.9592]"
-        ],
-        [
-          "CLAM",
-          "AUROC",
-          "0.9865",
-          "[0.9703, 0.9971]"
-        ],
-        [
-          "CLAM",
-          "AP",
-          "0.9802",
-          "[0.9590, 0.9956]"
-        ],
-        [
-          "CLAM",
-          "Brier score",
-          "0.1308",
-          "[0.1013, 0.1609]"
-        ],
-        [
-          "CLAM",
-          "Log loss",
-          "0.4005",
-          "[0.3273, 0.4748]"
-        ],
-        [
-          "DTFD-MIL",
-          "Accuracy",
-          "0.9531",
-          "[0.9141, 0.9844]"
-        ],
-        [
-          "DTFD-MIL",
-          "Precision",
-          "1.0000",
-          "[1.0000, 1.0000]"
-        ],
-        [
-          "DTFD-MIL",
-          "Sensitivity",
-          "0.8750",
-          "[0.7708, 0.9583]"
-        ],
-        [
-          "DTFD-MIL",
-          "Specificity",
-          "1.0000",
-          "[1.0000, 1.0000]"
-        ],
-        [
-          "DTFD-MIL",
-          "F1",
-          "0.9333",
-          "[0.8706, 0.9787]"
-        ],
-        [
-          "DTFD-MIL",
-          "AUROC",
-          "0.9977",
-          "[0.9922, 1.0000]"
-        ],
-        [
-          "DTFD-MIL",
-          "AP",
-          "0.9964",
-          "[0.9885, 1.0000]"
-        ],
-        [
-          "DTFD-MIL",
-          "Brier score",
-          "0.1179",
-          "[0.0877, 0.1490]"
-        ],
-        [
-          "DTFD-MIL",
-          "Log loss",
-          "0.3601",
-          "[0.2840, 0.4381]"
-        ],
-        [
-          "CAMIL",
-          "Accuracy",
-          "0.8750",
-          "[0.8281, 0.9219]"
-        ],
-        [
-          "CAMIL",
-          "Precision",
-          "1.0000",
-          "[1.0000, 1.0000]"
-        ],
-        [
-          "CAMIL",
-          "Sensitivity",
-          "0.6667",
-          "[0.5417, 0.7917]"
-        ],
-        [
-          "CAMIL",
-          "Specificity",
-          "1.0000",
-          "[1.0000, 1.0000]"
-        ],
-        [
-          "CAMIL",
-          "F1",
-          "0.8000",
-          "[0.7027, 0.8837]"
-        ],
-        [
-          "CAMIL",
-          "AUROC",
-          "0.9995",
-          "[0.9977, 1.0000]"
-        ],
-        [
-          "CAMIL",
-          "AP",
-          "0.9991",
-          "[0.9963, 1.0000]"
-        ],
-        [
-          "CAMIL",
-          "Brier score",
-          "0.1009",
-          "[0.0675, 0.1367]"
-        ],
-        [
-          "CAMIL",
-          "Log loss",
-          "0.3031",
-          "[0.2122, 0.4026]"
-        ]
-      ],
-      "note": "Note. 5,000 source-slide bootstrap replicates. Empirical intervals of [1, 1] for observed perfect precision or specificity reflect the resampling procedure and do not prove error-free population performance."
+      ]
     }
   ],
   "figures": [
     {
-      "number": 1,
+      "number": "archive-1",
       "caption": "Conceptual STEGASUS computational framework. Model development and sampled source-slide evaluation are followed by frozen whole-slide processing and the application component. The diagram distinguishes the purpose of each phase; it does not imply that the later phases independently validate the sampled classification results.",
       "src": "data/figures/figure-01.png",
-      "note": ""
+      "note": "",
+      "archiveNumber": 1
     },
     {
-      "number": 2,
-      "caption": "Detailed three-phase STEGASUS workflow. Phase I shows the implemented development and comparison procedures. Phase II identifies the 20-image whole-slide processing outputs, and Phase III identifies the application component. The implemented public website and local analysis host are described in Section 2.5; application checks and their limitations are reported separately from model performance.",
-      "src": "data/figures/figure-02.png",
-      "note": ""
-    },
-    {
-      "number": 3,
+      "number": "archive-3",
       "caption": "Conceptual illustration of source-slide grouping. The left panel illustrates how patch-wise mixing can distribute patches from the same source slide across partitions. The right panel keeps each sampled source-slide bag within its assigned partition. The labeled boxes are schematic examples, not an additional dataset or a patient-level independence analysis.",
       "src": "data/figures/figure-03.png",
-      "note": ""
+      "note": "",
+      "archiveNumber": 3
     },
     {
-      "number": 4,
+      "number": "archive-4",
       "caption": "Image and spatial representations in the four-expert STEGASUS framework. The image experts generate patch probabilities that are aggregated by the maximum within a source slide. The graph expert combines frozen 1,280-dimensional EfficientNetB0 features with original coordinates and attention pooling. The four aligned slide scores are then transformed, standardized, stacked, and calibrated.",
       "src": "data/figures/figure-04.png",
-      "note": ""
+      "note": "",
+      "archiveNumber": 4
     },
     {
-      "number": 5,
+      "number": "archive-5",
       "caption": "Conceptual comparison of spatial and self-only adjacency. Spatial adjacency permits information exchange between nearby patches and retains self-loops. Self-only adjacency removes interpatch communication while retaining the graph-head architecture. The sketch is not an observed tissue map, and the number of drawn edges does not represent the implemented eight-neighbor graph.",
       "src": "data/figures/figure-05.png",
-      "note": ""
+      "note": "",
+      "archiveNumber": 5
     },
     {
-      "number": 6,
-      "caption": "Development-fold fitting, calibration, and threshold selection. Five outer stratified folds produced out-of-fold (OOF) development scores. Within each outer fitting partition, three inner folds separated classifier fitting from sigmoid calibration. Scaling was fitted within the corresponding fitting folds. The selected operating threshold was subsequently applied to the final ensemble's test scores.",
+      "number": "archive-6",
+      "caption": "Development-fold fitting, calibration, and threshold selection. Five outer stratified folds produced out-of-fold (OOF) development scores. Within each outer fitting partition, three inner folds separated classifier fitting from sigmoid calibration. Scaling was fitted within the corresponding fitting folds. The selected operating threshold was subsequently applied to the final ensemble’s test scores.",
       "src": "data/figures/figure-06.png",
-      "note": ""
+      "note": "",
+      "archiveNumber": 6
     },
     {
-      "number": 7,
-      "caption": "Paired class-stratified bootstrap comparison. Positive and negative source-slide groups are resampled separately, and identical sampled indices are used for both models. Each replicate yields a metric difference. Percentile intervals summarize uncertainty conditional on the fitted predictions; they do not account for all training variation or correct prior test-informed development.",
-      "src": "data/figures/figure-07.png",
-      "note": ""
-    },
-    {
-      "number": 8,
-      "caption": "Individual-expert performance on 128 sampled source-slide groups. Panel A shows classification and ranking measures; its color scale spans 0.70-1.00, with darker cells indicating larger values. Panels B and C show Brier score and log loss on separate zero-based scales, where lower values are preferable; row order is shared. Labels retain the reported four-decimal estimates. These exploratory point estimates do not establish pairwise statistical differences.",
-      "src": "data/figures/figure-08.png",
-      "note": ""
-    },
-    {
-      "number": 9,
-      "caption": "Recorded training loss across five epochs. Image-expert losses are shown separately from the Spatial Graph loss because they summarize patch-level and slide-level objectives, respectively. Lines connect recorded epochs; no smoothing or validation-loss values are added. Decreasing training loss alone does not establish generalization or absence of overfitting.",
-      "src": "data/figures/figure-09.png",
-      "note": ""
-    },
-    {
-      "number": 10,
-      "caption": "Spatial and self-only graph performance across three matched training seeds (42, 123, and 2026). Points show means and horizontal whiskers show one standard deviation, not confidence intervals. Each panel uses its own displayed scale; the two numeric labels give spatial and self-only mean � standard deviation, respectively. Higher values are preferable except for Brier score and log loss. Variability describes graph-head training, not independent retraining of all image encoders.",
-      "src": "data/figures/figure-10.png",
-      "note": ""
-    },
-    {
-      "number": 11,
-      "caption": "Calibrated ensemble performance on 128 sampled source-slide groups. Points show estimates and horizontal whiskers show the reported 95% confidence intervals; labels give estimate [lower bound, upper bound]. Classification and ranking measures are separated from Brier score and log loss because metric direction and scale differ. Intervals retain the methods described in Section 2.6 and do not account for prior test-informed development.",
-      "src": "data/figures/figure-11.png",
-      "note": ""
-    },
-    {
-      "number": 12,
-      "caption": "Confusion matrices for the six principal configurations.",
-      "src": "data/figures/figure-12.png",
-      "note": "Note. Each matrix uses 128 sampled source-slide groups and its development-selected threshold."
-    },
-    {
-      "number": 13,
-      "caption": "ROC, precision-recall, and calibration curves.",
-      "src": "data/figures/figure-13.png",
-      "note": "Note. Panels show continuous-score behavior on the same test groups. Calibration uses five quantile bins; AP is reported separately from trapezoidal curve area."
-    },
-    {
-      "number": 14,
-      "caption": "Complete calibrated ensemble and leave-one-expert-out variants on the sampled source-slide groups. Panel A shows classification and ranking measures on a color scale spanning 0.70-1.00; panels B and C show Brier score and log loss on separate zero-based axes with shared row order. All point estimates are labeled to four decimal places. Each variant was refitted and used its own development-selected threshold. These comparisons describe complete prediction pipelines rather than the effect of removing a fixed coefficient.",
-      "src": "data/figures/figure-14.png",
-      "note": ""
-    },
-    {
-      "number": 15,
+      "number": "archive-15",
       "caption": "Frozen ensemble scores for 20 selected CAMELYON16 whole-slide images, grouped by reference label. The dashed line marks the fixed operating threshold of 0.628536. Hatched bars identify the four false negatives (test_004, test_010, test_011, and test_013); all ten reference-negative slides were classified as negative. Scores are labeled to four decimal places and are not validated patient-risk probabilities. This selected cohort provides exploratory feasibility evidence.",
       "src": "data/figures/figure-15.png",
-      "note": ""
+      "note": "",
+      "archiveNumber": 15
     },
     {
-      "number": 16,
-      "caption": "Overview interface of the deployed STEGASUS research website, showing study navigation, the four-expert framework, selected performance indicators, and access to the slide workspace.",
-      "src": "data/figures/figure-16.png",
-      "note": ""
-    },
-    {
-      "number": 17,
+      "number": "archive-17",
       "caption": "Primary comparison of the frozen STEGASUS baseline, Spatial Graph, and three adapted MIL heads on 128 sampled source-slide groups. Comparator seed 42 was primary; scores describe the implemented shared-feature protocol.",
       "src": "data/figures/figure-17.png",
-      "note": ""
+      "note": "",
+      "archiveNumber": 17
     },
     {
-      "number": 18,
-      "caption": "ROC, precision-recall, and five-bin calibration plots for the primary comparison. Ranking curves and fixed-threshold detection describe different aspects of performance. These curves do not establish patient-level independence.",
-      "src": "data/figures/figure-18.png",
-      "note": ""
-    },
-    {
-      "number": 19,
+      "number": "archive-19",
       "caption": "Average precision across three seeds for each adapted MIL comparator. Whiskers show one sample standard deviation. The common encoder remained frozen.",
       "src": "data/figures/figure-19.png",
-      "note": ""
+      "note": "",
+      "archiveNumber": 19
     },
     {
-      "number": 20,
-      "caption": "Recorded MIL-head inference cost averaged across the three available seeds. Cached feature input excludes patch extraction and encoder computation; measurements do not describe complete WSI processing time.",
-      "src": "data/figures/figure-20.png",
-      "note": ""
-    },
-    {
-      "number": 21,
-      "caption": "Supplementary patch-level discrimination and classification at hospital 2. The fixed patch threshold was 0.5. Patch dependence and documented prior source exposure limit interpretation.",
-      "src": "data/figures/figure-21.png",
-      "note": ""
-    },
-    {
-      "number": 22,
+      "number": "archive-22",
       "caption": "Example ResNet50 patch-score map at observed coordinates for WILDS patient_040_node_2. The image displays sampled patch scores and is not a verified lesion mask or an ensemble localization output.",
       "src": "data/figures/figure-22.png",
-      "note": ""
+      "note": "",
+      "archiveNumber": 22
     }
-  ]
+  ],
+  "figureNote": "Supporting figures retained from the earlier website archive. Archive identifiers are separate from figure numbers in the updated manuscript."
 }
